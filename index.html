@@ -3,44 +3,60 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Danh Bạ Phân Loại Danh Mục (Searchable)</title>
+    <title>Danh Bạ Thông Minh Cloud</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        /* Tối ưu hóa thanh cuộn cho danh mục thả xuống */
         .dropdown-scroll::-webkit-scrollbar { width: 4px; }
         .dropdown-scroll::-webkit-scrollbar-track { background: #f1f5f9; }
         .dropdown-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
     </style>
 </head>
-<body class="bg-slate-950 min-h-screen py-6 px-4 flex justify-center items-center">
+<body class="bg-slate-950 min-h-screen py-4 px-2 sm:p-6 flex justify-center items-center">
 
-    <div class="w-full max-w-lg bg-white rounded-3xl shadow-2xl overflow-hidden flex flex-col h-[90vh] max-h-[800px]">
-        <div class="bg-gradient-to-r from-blue-700 to-indigo-800 p-6 text-white shrink-0">
+    <div class="w-full max-w-4xl bg-white rounded-3xl shadow-2xl overflow-hidden flex flex-col h-[92vh] max-h-[850px]">
+        <div class="bg-gradient-to-r from-slate-800 to-indigo-950 p-5 text-white shrink-0">
             <div class="flex justify-between items-center">
                 <div>
-                    <h1 class="text-2xl font-black tracking-tight"><i class="fa-solid fa-users-rectangle text-amber-400 mr-1"></i> DANH BẠ ĐÁM MÂY</h1>
-                    <p class="text-blue-100 text-xs mt-1">Tìm kiếm danh bạ & Tìm kiếm danh mục thông minh</p>
+                    <h1 class="text-xl sm:text-2xl font-black tracking-tight flex items-center gap-2">
+                        <i class="fa-solid fa-address-book text-amber-400"></i> DANH BẠ NỘI BỘ
+                    </h1>
+                    <p class="text-slate-300 text-xs mt-0.5">Hệ thống lưu trữ dữ liệu đám mây tập trung</p>
                 </div>
-                <button onclick="openModal('add')" class="bg-white/20 hover:bg-white/30 text-white w-10 h-10 rounded-2xl flex items-center justify-center transition-all">
-                    <i class="fa-solid fa-plus text-lg"></i>
+                <button id="mainAddBtn" onclick="checkAdminBeforeAction('add')" class="bg-white/10 hover:bg-white/20 text-white px-3 py-2 rounded-xl flex items-center gap-1.5 text-xs sm:text-sm font-semibold transition-all">
+                    <i class="fa-solid fa-plus"></i> Thêm thành viên
                 </button>
             </div>
-            <div class="relative mt-5">
+            
+            <div class="relative mt-4">
                 <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 text-slate-400">
-                    <i class="fa-solid fa-magnifying-glass"></i>
+                    <i class="fa-solid fa-magnifying-glass text-sm"></i>
                 </span>
-                <input type="text" id="searchInput" onkeyup="filterContacts()" placeholder="Tìm theo tên, SĐT, chức vụ, địa bàn..." class="w-full pl-10 pr-4 py-3 bg-white text-slate-800 rounded-2xl focus:outline-none text-sm shadow-inner">
+                <input type="text" id="searchInput" onkeyup="filterContacts()" placeholder="Tìm nhanh không dấu theo tên, SĐT, chức vụ, địa bàn..." class="w-full pl-10 pr-4 py-2.5 bg-white text-slate-800 rounded-xl focus:outline-none text-sm shadow-inner">
             </div>
         </div>
 
-        <div class="bg-slate-50 px-6 py-2 border-b border-slate-100 text-xs font-bold text-slate-500 shrink-0" id="counter">
-            Đang tải dữ liệu...
+        <div class="bg-slate-50 px-5 py-2.5 border-b border-slate-100 flex justify-between items-center text-xs text-slate-500 shrink-0">
+            <span id="counter" class="font-bold">Đang tải dữ liệu...</span>
+            
+            <div id="adminStatusArea">
+                <button onclick="promptAdminLogin()" class="text-indigo-600 hover:text-indigo-800 font-bold flex items-center gap-1 transition-all">
+                    <i class="fa-solid fa-lock-open"></i> Mục quản trị
+                </button>
+            </div>
         </div>
 
-        <div id="contactList" class="flex-1 overflow-y-auto p-4 space-y-3 bg-slate-50/50">
-            <div class="text-center py-12 text-slate-400">Kết nối cơ sở dữ liệu...</div>
+        <div class="hidden md:grid grid-cols-12 gap-2 px-6 py-2 bg-slate-100 text-slate-500 text-xs font-bold uppercase tracking-wider shrink-0 border-b border-slate-200">
+            <div class="col-span-3">Họ và Tên</div>
+            <div class="col-span-3">Chức danh / Chức vụ</div>
+            <div class="col-span-3">Địa bàn</div>
+            <div class="col-span-2">Số điện thoại</div>
+            <div class="col-span-1 text-center">Thao tác</div>
+        </div>
+
+        <div id="contactList" class="flex-1 overflow-y-auto p-3 md:p-4 space-y-2 bg-slate-50/50">
+            <div class="text-center py-12 text-slate-400 text-sm">Đang đồng bộ cơ sở dữ liệu đám mây...</div>
         </div>
     </div>
 
@@ -68,7 +84,7 @@
                     </div>
                     <input type="hidden" id="formPosition" required>
                     <div id="dropdownformPosition" class="absolute left-0 right-0 mt-1 bg-white border rounded-xl shadow-xl z-50 p-2 space-y-2 hidden">
-                        <input type="text" onkeyup="filterDropdown('formPosition')" placeholder="Gõ từ khóa tìm chức vụ..." class="w-full px-3 py-1.5 border rounded-lg text-xs outline-none focus:ring-2 focus:ring-blue-500">
+                        <input type="text" onkeyup="filterDropdown('formPosition')" placeholder="Tìm kiếm chức vụ nhanh..." class="w-full px-3 py-1.5 border rounded-lg text-xs outline-none focus:ring-2 focus:ring-blue-500">
                         <div class="max-h-40 overflow-y-auto dropdown-scroll text-sm text-slate-700" id="optionsformPosition"></div>
                     </div>
                 </div>
@@ -81,34 +97,29 @@
                     </div>
                     <input type="hidden" id="formTitle" required>
                     <div id="dropdownformTitle" class="absolute left-0 right-0 mt-1 bg-white border rounded-xl shadow-xl z-50 p-2 space-y-2 hidden">
-                        <input type="text" onkeyup="filterDropdown('formTitle')" placeholder="Gõ từ khóa tìm chức danh..." class="w-full px-3 py-1.5 border rounded-lg text-xs outline-none focus:ring-2 focus:ring-blue-500">
+                        <input type="text" onkeyup="filterDropdown('formTitle')" placeholder="Tìm kiếm chức danh nhanh..." class="w-full px-3 py-1.5 border rounded-lg text-xs outline-none focus:ring-2 focus:ring-blue-500">
                         <div class="max-h-40 overflow-y-auto dropdown-scroll text-sm text-slate-700" id="optionsformTitle"></div>
                     </div>
                 </div>
 
                 <div class="relative dropdown-container" id="containerRegion">
-                    <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Địa bàn (Tùy chọn)</label>
+                    <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Địa bàn</label>
                     <div onclick="toggleDropdown('formRegion')" id="selectBoxformRegion" class="w-full px-4 py-2 border rounded-xl text-sm flex justify-between items-center cursor-pointer bg-white text-slate-400">
-                        <span>-- Không chọn / Để trống --</span>
+                        <span>-- Để trống / Toàn quốc --</span>
                         <i class="fa-solid fa-chevron-down text-slate-400 text-xs"></i>
                     </div>
                     <input type="hidden" id="formRegion">
                     <div id="dropdownformRegion" class="absolute left-0 right-0 mt-1 bg-white border rounded-xl shadow-xl z-50 p-2 space-y-2 hidden">
-                        <input type="text" onkeyup="filterDropdown('formRegion')" placeholder="Gõ từ khóa tìm địa bàn..." class="w-full px-3 py-1.5 border rounded-lg text-xs outline-none focus:ring-2 focus:ring-blue-500">
+                        <input type="text" onkeyup="filterDropdown('formRegion')" placeholder="Tìm kiếm địa bàn..." class="w-full px-3 py-1.5 border rounded-lg text-xs outline-none focus:ring-2 focus:ring-blue-500">
                         <div class="max-h-40 overflow-y-auto dropdown-scroll text-sm text-slate-700" id="optionsformRegion"></div>
                     </div>
                 </div>
 
-                <div class="bg-amber-50 p-3 rounded-xl border border-amber-200">
-                    <label class="block text-xs font-bold text-amber-800 uppercase mb-1">Mật mã xác thực Admin <span class="text-red-500">*</span></label>
-                    <input type="password" id="formAdminKey" required placeholder="Mật mã cấu hình RLS Supabase" class="w-full px-4 py-2 border border-amber-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-amber-500">
-                </div>
-
-                <div class="flex justify-between items-center pt-2 gap-2">
-                    <button type="button" id="deleteBtn" onclick="deleteContact()" class="bg-rose-50 text-rose-600 hover:bg-rose-100 px-4 py-2 rounded-xl font-semibold text-sm hidden transition-all">Xóa</button>
+                <div class="flex justify-between items-center pt-4 border-t border-slate-100 gap-2">
+                    <button type="button" id="deleteBtn" onclick="deleteContact()" class="bg-rose-50 text-rose-600 hover:bg-rose-100 px-4 py-2 rounded-xl font-bold text-sm hidden transition-all">Xóa nhân sự</button>
                     <div class="flex gap-2 ml-auto">
-                        <button type="button" onclick="closeModal()" class="bg-slate-100 text-slate-600 px-4 py-2 rounded-xl text-sm">Hủy</button>
-                        <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-xl font-semibold text-sm shadow-md transition-all">Lưu lại</button>
+                        <button type="button" onclick="closeModal()" class="bg-slate-100 text-slate-600 px-4 py-2 rounded-xl text-sm font-semibold">Hủy</button>
+                        <button type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2 rounded-xl font-bold text-sm shadow-md transition-all">Lưu thông tin</button>
                     </div>
                 </div>
             </form>
@@ -116,7 +127,7 @@
     </div>
 
     <script>
-        // --- 1. CẤU HÌNH THÔNG TIN KẾT NỐI SUPABASE CỦA BẠN TẠI ĐÂY ---
+        // --- 1. THÔNG TIN CẤU HÌNH SUPABASE ---
         const SUPABASE_URL = "https://aizuhegyzndeqktbeaax.supabase.co"; 
         const SUPABASE_ANON_KEY = "sb_publishable_6aIVGp_H_-UBK4xQ_liaGQ_2xZLCyUF";
 
@@ -124,22 +135,91 @@
         
         let contactsData = [];
         let categories = { positions: [], titles: [], regions: [] };
+        let currentAdminKey = null; // Lưu trữ mật mã Admin Token sau khi đăng nhập thành công một lần
 
-        // --- 2. LOGIC ĐIỀU KHIỂN SEARCHABLE DROPDOWN (HỘP CHỌN TỰ GÕ TÌM KIẾM) ---
+        // Hàm loại bỏ dấu tiếng Việt để tìm kiếm không chính xác (Mục tiêu 1)
+        function removeVietnameseTones(str) {
+            if (!str) return "";
+            str = str.replace(/à|á|ạ|ả|ã|â|ầ|ấ|ậ|ẩ|ẫ|ă|ằ|ắ|ặ|ẳ|ẵ/g, "a");
+            str = str.replace(/è|é|ẹ|ẻ|ẽ|ê|ề|ế|ệ|ể|ễ/g, "e");
+            str = str.replace(/ì|í|ị|ỉ|ĩ/g, "i");
+            str = str.replace(/ò|á|ọ|ỏ|õ|ô|ồ|ố|ộ|ổ|ỗ|ơ|ờ|ớ|ợ|ở|ỡ/g, "o");
+            str = str.replace(/ù|ú|ụ|ủ|ũ|ư|ừ|ứ|ự|ử|ữ/g, "u");
+            str = str.replace(/ỳ|ý|ỵ|ỷ|ỹ/g, "y");
+            str = str.replace(/đ/g, "d");
+            str = str.replace(/À|Á|Ạ|Ả|Ã|Â|Ầ|Ấ|Ậ|Ẩ|Ẫ|Ă|Ằ|Ắ|Ặ|Ẳ|Ẵ/g, "A");
+            str = str.replace(/È|É|Ẹ|Ẻ|Ẽ|Ê|Ề|Ế|Ệ|Ể|Ễ/g, "E");
+            str = str.replace(/Ì|Í|Ị|ỉ|Ĩ/g, "I");
+            str = str.replace(/Ò|Ó|Ọ|Ỏ|Õ|Ô|Ồ|Ố|Ộ|Ổ|Ỗ|Ơ|Ờ|Ớ|Ợ|Ở|Ỡ/g, "O");
+            str = str.replace(/Ù|Ú|Ụ|Ủ|Ũ|Ư|Ừ|Ứ|Ự|Ử|Ữ/g, "U");
+            str = str.replace(/Ỳ|Ý|Ỵ|Ỷ|Ỹ/g, "Y");
+            str = str.replace(/Đ/g, "D");
+            // Loại bỏ các ký tự dấu phụ kết hợp
+            str = str.replace(/\u0300|\u0301|\u0309|\u0303|\u0323/g, ""); 
+            str = str.replace(/\u02C6|\u0306|\u031B/g, ""); 
+            return str.toLowerCase().trim();
+        }
+
+        // --- 2. LOGIC ĐĂNG NHẬP ADMIN MỘT LẦN (Mục tiêu 4) ---
+        function promptAdminLogin() {
+            if(currentAdminKey) {
+                if(confirm("Bạn đang ở chế độ Quản trị viên. Bạn có muốn Đăng xuất thoát quyền không?")) {
+                    currentAdminKey = null;
+                    updateAdminUI();
+                }
+                return;
+            }
+            
+            const key = prompt("Nhập mật mã xác thực để kích hoạt Quyền Quản trị viên:");
+            if (key) {
+                currentAdminKey = key;
+                updateAdminUI();
+                // Tải lại danh bạ để cập nhật hiển thị các nút chức năng ẩn/hiện
+                renderContacts(contactsData);
+            }
+        }
+
+        function updateAdminUI() {
+            const area = document.getElementById('adminStatusArea');
+            const mainAddBtn = document.getElementById('mainAddBtn');
+            
+            if(currentAdminKey) {
+                area.innerHTML = `
+                    <span class="text-emerald-600 font-bold flex items-center gap-1 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200">
+                        <i class="fa-solid fa-user-shield"></i> Chế độ: Quản trị • <button onclick="promptAdminLogin()" class="underline text-slate-500 font-normal hover:text-red-500 ml-1">Đăng xuất</button>
+                    </span>`;
+                mainAddBtn.classList.remove('bg-white/10', 'text-white/70');
+                mainAddBtn.classList.add('bg-amber-500', 'text-slate-950', 'hover:bg-amber-400');
+            } else {
+                area.innerHTML = `
+                    <button onclick="promptAdminLogin()" class="text-indigo-600 hover:text-indigo-800 font-bold flex items-center gap-1 transition-all">
+                        <i class="fa-solid fa-lock-open"></i> Mục quản trị
+                    </button>`;
+                mainAddBtn.className = "bg-white/10 hover:bg-white/20 text-white px-3 py-2 rounded-xl flex items-center gap-1.5 text-xs sm:text-sm font-semibold transition-all";
+            }
+        }
+
+        function checkAdminBeforeAction(mode, id = null) {
+            if(!currentAdminKey) {
+                alert("Hệ thống đang ở chế độ xem. Vui lòng bấm vào 'Mục quản trị' ở góc dưới và nhập mật mã trước khi thực hiện!");
+                return;
+            }
+            openModal(mode, id);
+        }
+
+        // --- 3. ĐIỀU KHIỂN SEARCHABLE DROPDOWN (TÌM KIẾM DANH MỤC KHÔNG DẤU) ---
         function toggleDropdown(fieldId) {
             event.stopPropagation();
             const dropdown = document.getElementById('dropdown' + fieldId);
             const isHidden = dropdown.classList.contains('hidden');
-            
-            // Đóng tất cả các dropdown khác trước khi mở cái mới
             document.querySelectorAll("[id^='dropdownform']").forEach(el => el.classList.add('hidden'));
             
             if (isHidden) {
                 dropdown.classList.remove('hidden');
-                // Tự động focus vào ô tìm kiếm nhỏ bên trong dropdown
-                dropdown.querySelector('input').focus();
-                dropdown.querySelector('input').value = '';
-                filterDropdown(fieldId); // Reset danh sách hiển thị gốc
+                const inp = dropdown.querySelector('input');
+                inp.value = '';
+                inp.focus();
+                filterDropdown(fieldId);
             }
         }
 
@@ -149,15 +229,14 @@
             }
         }
 
-        // Lọc trực tiếp các option danh mục khi người dùng gõ từ khóa
         function filterDropdown(fieldId) {
             const input = document.getElementById('dropdown' + fieldId).querySelector('input');
-            const filter = input.value.toLowerCase();
+            const filter = removeVietnameseTones(input.value); // Tìm kiếm không dấu danh mục
             const optionItems = document.getElementById('options' + fieldId).getElementsByClassName('option-item');
             
             for (let i = 0; i < optionItems.length; i++) {
-                const txtValue = optionItems[i].textContent || optionItems[i].innerText;
-                if (txtValue.toLowerCase().indexOf(filter) > -1) {
+                const txtValue = removeVietnameseTones(optionItems[i].textContent || optionItems[i].innerText);
+                if (txtValue.indexOf(filter) > -1) {
                     optionItems[i].style.display = "";
                 } else {
                     optionItems[i].style.display = "none";
@@ -165,14 +244,13 @@
             }
         }
 
-        // Thực thi khi người dùng click chọn 1 mục cụ thể trong danh sách tìm kiếm
         function selectOption(fieldId, id, name) {
             const hiddenInput = document.getElementById(fieldId);
             const selectBox = document.getElementById('selectBox' + fieldId);
             
             if(id === null || id === "") {
                 hiddenInput.value = "";
-                selectBox.querySelector('span').innerText = fieldId === 'formRegion' ? "-- Không chọn / Để trống --" : "-- Chọn danh mục --";
+                selectBox.querySelector('span').innerText = fieldId === 'formRegion' ? "-- Để trống / Toàn quốc --" : "-- Chọn danh mục --";
                 selectBox.classList.add('text-slate-400');
                 selectBox.classList.remove('text-slate-800');
             } else {
@@ -184,7 +262,7 @@
             document.getElementById('dropdown' + fieldId).classList.add('hidden');
         }
 
-        // --- 3. ĐỔ DỮ LIỆU TỪ SUPABASE VÀO CÁC CUSTOM DROPDOWN ---
+        // --- 4. TẢI DANH MỤC BAN ĐẦU ---
         async function loadCategories() {
             const [posRes, titleRes, regRes] = await Promise.all([
                 _supabase.from('positions').select('id, name').order('name'),
@@ -198,7 +276,7 @@
 
             buildDropdownOptions('formPosition', categories.positions, false);
             buildDropdownOptions('formTitle', categories.titles, false);
-            buildDropdownOptions('formRegion', categories.regions, true); // true nghĩa là có thêm lựa chọn trống
+            buildDropdownOptions('formRegion', categories.regions, true);
         }
 
         function buildDropdownOptions(fieldId, dataList, hasEmptyOption) {
@@ -208,21 +286,21 @@
             if(hasEmptyOption) {
                 const emptyDiv = document.createElement('div');
                 emptyDiv.className = "option-item px-3 py-2 hover:bg-slate-100 cursor-pointer text-slate-400 italic text-xs border-b border-slate-50";
-                emptyDiv.innerText = "-- Trống / Không chọn --";
+                emptyDiv.innerText = "-- Để trống / Toàn quốc --";
                 emptyDiv.onclick = () => selectOption(fieldId, "", "");
                 optionsContainer.appendChild(emptyDiv);
             }
 
             dataList.forEach(item => {
                 const div = document.createElement('div');
-                div.className = "option-item px-3 py-2 hover:bg-blue-50 hover:text-blue-600 cursor-pointer border-b border-slate-50 transition-all";
+                div.className = "option-item px-3 py-2 hover:bg-indigo-50 hover:text-indigo-600 cursor-pointer border-b border-slate-50 transition-all";
                 div.innerText = item.name;
                 div.onclick = () => selectOption(fieldId, item.id, item.name);
                 optionsContainer.appendChild(div);
             });
         }
 
-        // --- 4. TẢI DỮ LIỆU DANH BẠ SỬ DỤNG LỆNH JOIN BẢNG ---
+        // --- 5. ĐỒNG BỘ DANH SÁCH - HIỂN THỊ TRÊN MỘT DÒNG (Mục tiêu 2, 3) ---
         async function loadContacts() {
             const { data, error } = await _supabase
                 .from('contacts')
@@ -235,7 +313,7 @@
                 .order('name', { ascending: true });
 
             if (error) {
-                document.getElementById('contactList').innerHTML = `<div class="text-center text-red-500 py-6">Lỗi: ${error.message}</div>`;
+                document.getElementById('contactList').innerHTML = `<div class="text-center text-red-500 py-6">Lỗi kết nối: ${error.message}</div>`;
                 return;
             }
             contactsData = data || [];
@@ -246,71 +324,88 @@
             const container = document.getElementById('contactList');
             container.innerHTML = '';
             
-            document.getElementById('counter').innerText = `Tổng số: ${data.length} thành viên`;
+            document.getElementById('counter').innerText = `Tổng số: ${data.length} nhân sự`;
 
             if(data.length === 0) {
-                container.innerHTML = `<div class="text-center py-12 text-slate-400 text-sm">Không tìm thấy dữ liệu phù hợp.</div>`;
+                container.innerHTML = `<div class="text-center py-12 text-slate-400 text-sm">Không tìm thấy kết quả phù hợp.</div>`;
                 return;
             }
 
             data.forEach(item => {
                 const posName = item.positions ? item.positions.name : 'Chưa rõ';
                 const titleName = item.titles ? item.titles.name : 'Chưa rõ';
-                const regName = item.regions ? item.regions.name : 'Toàn quốc / Trống';
+                const regName = item.regions ? item.regions.name : '—';
 
-                const div = document.createElement('div');
-                div.className = "bg-white p-4 rounded-2xl flex items-center justify-between shadow-sm border border-slate-100 hover:shadow-md transition-all";
-                div.innerHTML = `
-                    <div class="flex items-center space-x-3.5 min-w-0">
-                        <div class="w-11 h-11 bg-indigo-50 text-indigo-600 font-black rounded-xl flex items-center justify-center shrink-0">
+                const row = document.createElement('div');
+                // Giao diện co giãn: Mobile hiển thị dạng khối hàng ngang thu gọn, Desktop hiển thị dạng bảng lưới grid 12 cột chuẩn chỉnh trên 1 dòng
+                row.className = "bg-white p-3 md:px-6 md:py-2.5 rounded-xl md:rounded-none flex flex-col md:grid md:grid-cols-12 gap-1 md:gap-2 items-start md:items-center shadow-sm md:shadow-none border border-slate-100 md:border-b md:border-slate-100 hover:bg-slate-50/80 transition-all";
+                
+                row.innerHTML = `
+                    <div class="col-span-3 font-bold text-slate-800 text-sm sm:text-base md:text-sm flex items-center gap-2 min-w-0 w-full">
+                        <div class="w-7 h-7 bg-indigo-50 text-indigo-600 rounded-lg flex items-center justify-center text-xs shrink-0 font-black md:hidden">
                             ${item.name.charAt(0).toUpperCase()}
                         </div>
-                        <div class="min-w-0">
-                            <h4 class="font-bold text-slate-800 text-sm md:text-base truncate">${item.name}</h4>
-                            <div class="text-slate-400 text-xs space-y-0.5 mt-0.5 font-medium">
-                                <p class="text-indigo-600"><i class="fa-solid fa-id-card mr-1"></i>${titleName} • ${posName}</p>
-                                <p><i class="fa-solid fa-location-dot mr-1.5 pl-0.5"></i>${regName}</p>
-                            </div>
-                        </div>
+                        <span class="truncate">${item.name}</span>
                     </div>
-                    <div class="flex items-center gap-1 shrink-0 ml-2">
-                        <button onclick="openModal('edit', ${item.id})" class="w-9 h-9 text-slate-400 hover:text-blue-600 rounded-lg flex items-center justify-center"><i class="fa-solid fa-pen-to-square text-sm"></i></button>
-                        <a href="tel:${item.phone}" class="w-9 h-9 bg-emerald-50 text-emerald-600 hover:bg-emerald-100 rounded-xl flex items-center justify-center shadow-sm active:scale-90 transition-all"><i class="fa-solid fa-phone text-sm"></i></a>
+                    
+                    <div class="col-span-3 text-xs md:text-sm text-indigo-600 font-medium">
+                        <span class="md:hidden text-slate-400 font-normal">Chức vụ: </span>${titleName} • ${posName}
+                    </div>
+                    
+                    <div class="col-span-3 text-xs md:text-sm text-slate-500 font-medium truncate w-full">
+                        <span class="md:hidden text-slate-400 font-normal">Địa bàn: </span>${regName}
+                    </div>
+                    
+                    <div class="col-span-2 text-sm font-bold text-slate-700 tracking-wide mt-1 md:mt-0">
+                        <span class="md:hidden text-slate-400 font-normal text-xs block">Số điện thoại: </span>
+                        <i class="fa-solid fa-phone text-slate-300 mr-1 text-xs md:inline hidden"></i>${item.phone}
+                    </div>
+                    
+                    <div class="col-span-1 flex items-center justify-end md:justify-center gap-2 w-full mt-2 md:mt-0 pt-2 md:pt-0 border-t border-slate-50 md:border-none shrink-0">
+                        ${currentAdminKey ? `
+                            <button onclick="checkAdminBeforeAction('edit', ${item.id})" class="text-xs font-semibold px-2 py-1 bg-amber-50 text-amber-700 border border-amber-200 rounded-lg hover:bg-amber-100 flex items-center gap-1" title="Sửa thông tin nhân sự">
+                                <i class="fa-solid fa-pen-to-square"></i>Sửa
+                            </button>
+                        ` : ''}
+                        <a href="tel:${item.phone}" class="w-7 h-7 md:w-8 md:h-8 bg-emerald-50 text-emerald-600 hover:bg-emerald-100 rounded-lg flex items-center justify-center shadow-sm active:scale-90 transition-all" title="Bấm gọi ngay">
+                            <i class="fa-solid fa-phone text-xs"></i>
+                        </a>
                     </div>
                 `;
-                container.appendChild(div);
+                container.appendChild(row);
             });
         }
 
-        // --- 5. TÌM KIẾM DANH BẠ ---
+        // --- 6. TÌM KIẾM KHÔNG DẤU ĐA TRƯỜNG DỮ LIỆU (Mục tiêu 1) ---
         function filterContacts() {
-            const query = document.getElementById('searchInput').value.toLowerCase().trim();
+            const query = removeVietnameseTones(document.getElementById('searchInput').value);
+            
             const filtered = contactsData.filter(c => {
-                const nameMatch = c.name.toLowerCase().includes(query);
-                const phoneMatch = c.phone.includes(query);
-                const posMatch = c.positions && c.positions.name.toLowerCase().includes(query);
-                const titleMatch = c.titles && c.titles.name.toLowerCase().includes(query);
-                const regMatch = c.regions && c.regions.name.toLowerCase().includes(query);
+                const nameStr = removeVietnameseTones(c.name);
+                const phoneStr = c.phone;
+                const posStr = c.positions ? removeVietnameseTones(c.positions.name) : "";
+                const titleStr = c.titles ? removeVietnameseTones(c.titles.name) : "";
+                const regStr = c.regions ? removeVietnameseTones(c.regions.name) : "";
                 
-                return nameMatch || phoneMatch || posMatch || titleMatch || regMatch;
+                return nameStr.includes(query) || 
+                       phoneStr.includes(query) || 
+                       posStr.includes(query) || 
+                       titleStr.includes(query) || 
+                       regStr.includes(query);
             });
             renderContacts(filtered);
         }
 
-        // --- 6. ĐIỀU KHIỂN MỞ MODAL VÀ ĐỒNG BỘ DỮ LIỆU ĐÃ CHỌN ---
+        // --- 7. ĐIỀU KHIỂN MODAL FORM ---
         function openModal(mode, id = null) {
             document.getElementById('contactForm').reset();
             document.getElementById('contactModal').classList.remove('hidden');
-            
-            // Đóng tất cả dropdown ẩn
             document.querySelectorAll("[id^='dropdownform']").forEach(el => el.classList.add('hidden'));
-
+            
             if(mode === 'add') {
                 document.getElementById('modalTitle').innerText = "Thêm Thành Viên Mới";
                 document.getElementById('editId').value = "";
                 document.getElementById('deleteBtn').classList.add('hidden');
-                
-                // Reset giao diện hiển thị text hộp chọn Custom Dropdown
                 selectOption('formPosition', "", "");
                 selectOption('formTitle', "", "");
                 selectOption('formRegion', "", "");
@@ -324,7 +419,6 @@
                     document.getElementById('formName').value = item.name;
                     document.getElementById('formPhone').value = item.phone;
                     
-                    // Gán giá trị ID ẩn và hiển thị Text tương ứng lên hộp chọn
                     const currentPos = categories.positions.find(p => p.id === item.position_id);
                     if(currentPos) selectOption('formPosition', currentPos.id, currentPos.name);
 
@@ -343,15 +437,13 @@
 
         function closeModal() { document.getElementById('contactModal').classList.add('hidden'); }
 
-        // --- 7. GỬI DỮ LIỆU LÊN ĐÁM MÂY KÈM CHÌA KHÓA XÁC THỰC RLS ---
+        // --- 8. GỬI DỮ LIỆU LÊN ĐÁM MÂY KÈM CHÌA KHÓA LƯU TRONG PHIÊN SỬ DỤNG ---
         async function handleFormSubmit(e) {
             e.preventDefault();
             const id = document.getElementById('editId').value;
-            const adminKey = document.getElementById('formAdminKey').value;
             
-            // Kiểm tra các trường bắt buộc đã được click chọn chưa
             if(!document.getElementById('formPosition').value || !document.getElementById('formTitle').value) {
-                alert("Vui lòng chọn Chức vụ và Chức danh bằng cách gõ chọn trong ô!");
+                alert("Vui lòng gõ và chọn Chức vụ / Chức danh bằng danh mục!");
                 return;
             }
 
@@ -363,8 +455,9 @@
                 region_id: document.getElementById('formRegion').value ? parseInt(document.getElementById('formRegion').value) : null
             };
 
+            // Sử dụng Token Admin đã lưu khi đăng nhập thành công từ trước
             const clientWithAuth = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
-                global: { headers: { 'x-admin-key': adminKey } }
+                global: { headers: { 'x-admin-key': currentAdminKey } }
             });
 
             let result;
@@ -375,7 +468,7 @@
             }
 
             if(result.error) {
-                alert("Thao tác thất bại! Hãy kiểm tra lại mật mã xác thực Admin.");
+                alert("Lỗi thao tác! Mật mã quản trị của bạn không chính xác hoặc hết hạn quyền.");
                 console.error(result.error);
             } else {
                 closeModal();
@@ -383,17 +476,16 @@
             }
         }
 
-        // --- 8. HÀNH ĐỘNG XÓA ---
+        // --- 9. HÀNH ĐỘNG XÓA ---
         async function deleteContact() {
             const id = document.getElementById('editId').value;
-            const adminKey = document.getElementById('formAdminKey').value;
-            if(id && confirm("Bạn có thực sự chắc chắn muốn xóa thành viên này không?")) {
+            if(id && confirm("Bạn có thực sự chắc chắn muốn xóa vĩnh viễn nhân sự này khỏi hệ thống không?")) {
                 const clientWithAuth = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
-                    global: { headers: { 'x-admin-key': adminKey } }
+                    global: { headers: { 'x-admin-key': currentAdminKey } }
                 });
                 const { error } = await clientWithAuth.from('contacts').delete().eq('id', id);
                 if(error) {
-                    alert("Không thể xóa! Có lỗi xảy ra hoặc sai mật mã Admin.");
+                    alert("Không thể xóa! Có lỗi hệ thống hoặc token xác thực Admin sai.");
                 } else {
                     closeModal();
                     loadContacts();
@@ -401,8 +493,8 @@
             }
         }
 
-        // Khởi chạy khi tải trang hoàn tất
         window.onload = async () => {
+            updateAdminUI();
             await loadCategories();
             await loadContacts();
         };
