@@ -3,29 +3,30 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Danh Bạ Phân Loại Danh Mục</title>
-    <!-- Tailwind CSS -->
+    <title>Danh Bạ Phân Loại Danh Mục (Searchable)</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- FontAwesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Supabase JS Library -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        /* Tối ưu hóa thanh cuộn cho danh mục thả xuống */
+        .dropdown-scroll::-webkit-scrollbar { width: 4px; }
+        .dropdown-scroll::-webkit-scrollbar-track { background: #f1f5f9; }
+        .dropdown-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+    </style>
 </head>
 <body class="bg-slate-950 min-h-screen py-6 px-4 flex justify-center items-center">
 
     <div class="w-full max-w-lg bg-white rounded-3xl shadow-2xl overflow-hidden flex flex-col h-[90vh] max-h-[800px]">
-        <!-- Header -->
         <div class="bg-gradient-to-r from-blue-700 to-indigo-800 p-6 text-white shrink-0">
             <div class="flex justify-between items-center">
                 <div>
                     <h1 class="text-2xl font-black tracking-tight"><i class="fa-solid fa-users-rectangle text-amber-400 mr-1"></i> DANH BẠ ĐÁM MÂY</h1>
-                    <p class="text-blue-100 text-xs mt-1">Phân loại theo Chức vụ • Chức danh • Địa bàn</p>
+                    <p class="text-blue-100 text-xs mt-1">Tìm kiếm danh bạ & Tìm kiếm danh mục thông minh</p>
                 </div>
                 <button onclick="openModal('add')" class="bg-white/20 hover:bg-white/30 text-white w-10 h-10 rounded-2xl flex items-center justify-center transition-all">
                     <i class="fa-solid fa-plus text-lg"></i>
                 </button>
             </div>
-            <!-- Ô Tìm Kiếm -->
             <div class="relative mt-5">
                 <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 text-slate-400">
                     <i class="fa-solid fa-magnifying-glass"></i>
@@ -34,67 +35,75 @@
             </div>
         </div>
 
-        <!-- Thanh đếm -->
         <div class="bg-slate-50 px-6 py-2 border-b border-slate-100 text-xs font-bold text-slate-500 shrink-0" id="counter">
             Đang tải dữ liệu...
         </div>
 
-        <!-- Danh sách hiển thị danh bạ -->
         <div id="contactList" class="flex-1 overflow-y-auto p-4 space-y-3 bg-slate-50/50">
             <div class="text-center py-12 text-slate-400">Kết nối cơ sở dữ liệu...</div>
         </div>
     </div>
 
-    <!-- MODAL FORM (THÊM / SỬA) -->
     <div id="contactModal" class="fixed inset-0 bg-slate-950/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
-        <div class="bg-white w-full max-w-md rounded-3xl shadow-2xl p-6 space-y-4 max-h-[95vh] overflow-y-auto">
+        <div class="bg-white w-full max-w-md rounded-3xl shadow-2xl p-6 space-y-4 max-h-[95vh] overflow-y-auto" onclick="closeAllDropdowns(event)">
             <h3 id="modalTitle" class="text-lg font-bold text-slate-800">Thêm Thành Viên</h3>
             <form id="contactForm" onsubmit="handleFormSubmit(event)" class="space-y-3.5">
                 <input type="hidden" id="editId">
                 
-                <!-- Họ Tên -->
                 <div>
                     <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Họ và Tên <span class="text-red-500">*</span></label>
                     <input type="text" id="formName" required placeholder="Ví dụ: Nguyễn Văn A" class="w-full px-4 py-2 border rounded-xl text-sm focus:ring-2 focus:ring-blue-500 outline-none">
                 </div>
                 
-                <!-- Số điện thoại -->
                 <div>
                     <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Số điện thoại <span class="text-red-500">*</span></label>
                     <input type="tel" id="formPhone" required placeholder="Ví dụ: 0901234567" class="w-full px-4 py-2 border rounded-xl text-sm focus:ring-2 focus:ring-blue-500 outline-none">
                 </div>
 
-                <!-- Chức vụ (Danh mục) -->
-                <div>
+                <div class="relative dropdown-container" id="containerPosition">
                     <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Chức vụ <span class="text-red-500">*</span></label>
-                    <select id="formPosition" required class="w-full px-4 py-2 border rounded-xl text-sm focus:ring-2 focus:ring-blue-500 outline-none bg-white">
-                        <option value="">-- Chọn chức vụ --</option>
-                    </select>
+                    <div onclick="toggleDropdown('formPosition')" id="selectBoxformPosition" class="w-full px-4 py-2 border rounded-xl text-sm flex justify-between items-center cursor-pointer bg-white text-slate-400">
+                        <span>-- Chọn chức vụ --</span>
+                        <i class="fa-solid fa-chevron-down text-slate-400 text-xs"></i>
+                    </div>
+                    <input type="hidden" id="formPosition" required>
+                    <div id="dropdownformPosition" class="absolute left-0 right-0 mt-1 bg-white border rounded-xl shadow-xl z-50 p-2 space-y-2 hidden">
+                        <input type="text" onkeyup="filterDropdown('formPosition')" placeholder="Gõ từ khóa tìm chức vụ..." class="w-full px-3 py-1.5 border rounded-lg text-xs outline-none focus:ring-2 focus:ring-blue-500">
+                        <div class="max-h-40 overflow-y-auto dropdown-scroll text-sm text-slate-700" id="optionsformPosition"></div>
+                    </div>
                 </div>
 
-                <!-- Chức danh (Danh mục) -->
-                <div>
+                <div class="relative dropdown-container" id="containerTitle">
                     <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Chức danh <span class="text-red-500">*</span></label>
-                    <select id="formTitle" required class="w-full px-4 py-2 border rounded-xl text-sm focus:ring-2 focus:ring-blue-500 outline-none bg-white">
-                        <option value="">-- Chọn chức danh --</option>
-                    </select>
+                    <div onclick="toggleDropdown('formTitle')" id="selectBoxformTitle" class="w-full px-4 py-2 border rounded-xl text-sm flex justify-between items-center cursor-pointer bg-white text-slate-400">
+                        <span>-- Chọn chức danh --</span>
+                        <i class="fa-solid fa-chevron-down text-slate-400 text-xs"></i>
+                    </div>
+                    <input type="hidden" id="formTitle" required>
+                    <div id="dropdownformTitle" class="absolute left-0 right-0 mt-1 bg-white border rounded-xl shadow-xl z-50 p-2 space-y-2 hidden">
+                        <input type="text" onkeyup="filterDropdown('formTitle')" placeholder="Gõ từ khóa tìm chức danh..." class="w-full px-3 py-1.5 border rounded-lg text-xs outline-none focus:ring-2 focus:ring-blue-500">
+                        <div class="max-h-40 overflow-y-auto dropdown-scroll text-sm text-slate-700" id="optionsformTitle"></div>
+                    </div>
                 </div>
 
-                <!-- Địa bàn (Danh mục - Không bắt buộc) -->
-                <div>
+                <div class="relative dropdown-container" id="containerRegion">
                     <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Địa bàn (Tùy chọn)</label>
-                    <select id="formRegion" class="w-full px-4 py-2 border rounded-xl text-sm focus:ring-2 focus:ring-blue-500 outline-none bg-white">
-                        <option value="">-- Không chọn / Trống --</option>
-                    </select>
+                    <div onclick="toggleDropdown('formRegion')" id="selectBoxformRegion" class="w-full px-4 py-2 border rounded-xl text-sm flex justify-between items-center cursor-pointer bg-white text-slate-400">
+                        <span>-- Không chọn / Để trống --</span>
+                        <i class="fa-solid fa-chevron-down text-slate-400 text-xs"></i>
+                    </div>
+                    <input type="hidden" id="formRegion">
+                    <div id="dropdownformRegion" class="absolute left-0 right-0 mt-1 bg-white border rounded-xl shadow-xl z-50 p-2 space-y-2 hidden">
+                        <input type="text" onkeyup="filterDropdown('formRegion')" placeholder="Gõ từ khóa tìm địa bàn..." class="w-full px-3 py-1.5 border rounded-lg text-xs outline-none focus:ring-2 focus:ring-blue-500">
+                        <div class="max-h-40 overflow-y-auto dropdown-scroll text-sm text-slate-700" id="optionsformRegion"></div>
+                    </div>
                 </div>
 
-                <!-- Xác thực Admin Key -->
                 <div class="bg-amber-50 p-3 rounded-xl border border-amber-200">
                     <label class="block text-xs font-bold text-amber-800 uppercase mb-1">Mật mã xác thực Admin <span class="text-red-500">*</span></label>
                     <input type="password" id="formAdminKey" required placeholder="Mật mã cấu hình RLS Supabase" class="w-full px-4 py-2 border border-amber-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-amber-500">
                 </div>
 
-                <!-- Nút thao tác -->
                 <div class="flex justify-between items-center pt-2 gap-2">
                     <button type="button" id="deleteBtn" onclick="deleteContact()" class="bg-rose-50 text-rose-600 hover:bg-rose-100 px-4 py-2 rounded-xl font-semibold text-sm hidden transition-all">Xóa</button>
                     <div class="flex gap-2 ml-auto">
@@ -116,7 +125,66 @@
         let contactsData = [];
         let categories = { positions: [], titles: [], regions: [] };
 
-        // --- 2. TỰ ĐỘNG TẢI DANH MỤC VÀO FORM <SELECT> ---
+        // --- 2. LOGIC ĐIỀU KHIỂN SEARCHABLE DROPDOWN (HỘP CHỌN TỰ GÕ TÌM KIẾM) ---
+        function toggleDropdown(fieldId) {
+            event.stopPropagation();
+            const dropdown = document.getElementById('dropdown' + fieldId);
+            const isHidden = dropdown.classList.contains('hidden');
+            
+            // Đóng tất cả các dropdown khác trước khi mở cái mới
+            document.querySelectorAll("[id^='dropdownform']").forEach(el => el.classList.add('hidden'));
+            
+            if (isHidden) {
+                dropdown.classList.remove('hidden');
+                // Tự động focus vào ô tìm kiếm nhỏ bên trong dropdown
+                dropdown.querySelector('input').focus();
+                dropdown.querySelector('input').value = '';
+                filterDropdown(fieldId); // Reset danh sách hiển thị gốc
+            }
+        }
+
+        function closeAllDropdowns(event) {
+            if (!event.target.closest('.dropdown-container')) {
+                document.querySelectorAll("[id^='dropdownform']").forEach(el => el.classList.add('hidden'));
+            }
+        }
+
+        // Lọc trực tiếp các option danh mục khi người dùng gõ từ khóa
+        function filterDropdown(fieldId) {
+            const input = document.getElementById('dropdown' + fieldId).querySelector('input');
+            const filter = input.value.toLowerCase();
+            const optionItems = document.getElementById('options' + fieldId).getElementsByClassName('option-item');
+            
+            for (let i = 0; i < optionItems.length; i++) {
+                const txtValue = optionItems[i].textContent || optionItems[i].innerText;
+                if (txtValue.toLowerCase().indexOf(filter) > -1) {
+                    optionItems[i].style.display = "";
+                } else {
+                    optionItems[i].style.display = "none";
+                }
+            }
+        }
+
+        // Thực thi khi người dùng click chọn 1 mục cụ thể trong danh sách tìm kiếm
+        function selectOption(fieldId, id, name) {
+            const hiddenInput = document.getElementById(fieldId);
+            const selectBox = document.getElementById('selectBox' + fieldId);
+            
+            if(id === null || id === "") {
+                hiddenInput.value = "";
+                selectBox.querySelector('span').innerText = fieldId === 'formRegion' ? "-- Không chọn / Để trống --" : "-- Chọn danh mục --";
+                selectBox.classList.add('text-slate-400');
+                selectBox.classList.remove('text-slate-800');
+            } else {
+                hiddenInput.value = id;
+                selectBox.querySelector('span').innerText = name;
+                selectBox.classList.remove('text-slate-400');
+                selectBox.classList.add('text-slate-800');
+            }
+            document.getElementById('dropdown' + fieldId).classList.add('hidden');
+        }
+
+        // --- 3. ĐỔ DỮ LIỆU TỪ SUPABASE VÀO CÁC CUSTOM DROPDOWN ---
         async function loadCategories() {
             const [posRes, titleRes, regRes] = await Promise.all([
                 _supabase.from('positions').select('id, name').order('name'),
@@ -128,27 +196,34 @@
             categories.titles = titleRes.data || [];
             categories.regions = regRes.data || [];
 
-            // Đổ vào thẻ select tương ứng
-            populateSelect('formPosition', categories.positions);
-            populateSelect('formTitle', categories.titles);
-            populateSelect('formRegion', categories.regions);
+            buildDropdownOptions('formPosition', categories.positions, false);
+            buildDropdownOptions('formTitle', categories.titles, false);
+            buildDropdownOptions('formRegion', categories.regions, true); // true nghĩa là có thêm lựa chọn trống
         }
 
-        function populateSelect(elementId, dataList) {
-            const select = document.getElementById(elementId);
-            // Giữ lại option đầu tiên mặc định
-            select.innerHTML = select.options[0].outerHTML; 
+        function buildDropdownOptions(fieldId, dataList, hasEmptyOption) {
+            const optionsContainer = document.getElementById('options' + fieldId);
+            optionsContainer.innerHTML = '';
+
+            if(hasEmptyOption) {
+                const emptyDiv = document.createElement('div');
+                emptyDiv.className = "option-item px-3 py-2 hover:bg-slate-100 cursor-pointer text-slate-400 italic text-xs border-b border-slate-50";
+                emptyDiv.innerText = "-- Trống / Không chọn --";
+                emptyDiv.onclick = () => selectOption(fieldId, "", "");
+                optionsContainer.appendChild(emptyDiv);
+            }
+
             dataList.forEach(item => {
-                const opt = document.createElement('option');
-                opt.value = item.id;
-                opt.innerText = item.name;
-                select.appendChild(opt);
+                const div = document.createElement('div');
+                div.className = "option-item px-3 py-2 hover:bg-blue-50 hover:text-blue-600 cursor-pointer border-b border-slate-50 transition-all";
+                div.innerText = item.name;
+                div.onclick = () => selectOption(fieldId, item.id, item.name);
+                optionsContainer.appendChild(div);
             });
         }
 
-        // --- 3. TẢI DỮ LIỆU DANH BẠ SỬ DỤNG LỆNH JOIN BẢNG ---
+        // --- 4. TẢI DỮ LIỆU DANH BẠ SỬ DỤNG LỆNH JOIN BẢNG ---
         async function loadContacts() {
-            // Thực hiện Join bảng thông qua định dạng select đặc biệt của Supabase
             const { data, error } = await _supabase
                 .from('contacts')
                 .select(`
@@ -179,7 +254,6 @@
             }
 
             data.forEach(item => {
-                // Đọc thông tin từ đối tượng kết nối (Nếu trống sẽ hiển thị dấu gạch ngang)
                 const posName = item.positions ? item.positions.name : 'Chưa rõ';
                 const titleName = item.titles ? item.titles.name : 'Chưa rõ';
                 const regName = item.regions ? item.regions.name : 'Toàn quốc / Trống';
@@ -208,7 +282,7 @@
             });
         }
 
-        // --- 4. TÌM KIẾM THEO TẤT CẢ CÁC TRƯỜNG DỮ LIỆU ---
+        // --- 5. TÌM KIẾM DANH BẠ ---
         function filterContacts() {
             const query = document.getElementById('searchInput').value.toLowerCase().trim();
             const filtered = contactsData.filter(c => {
@@ -223,15 +297,23 @@
             renderContacts(filtered);
         }
 
-        // --- 5. ĐIỀU KHIỂN MODAL FORM ---
+        // --- 6. ĐIỀU KHIỂN MỞ MODAL VÀ ĐỒNG BỘ DỮ LIỆU ĐÃ CHỌN ---
         function openModal(mode, id = null) {
             document.getElementById('contactForm').reset();
             document.getElementById('contactModal').classList.remove('hidden');
             
+            // Đóng tất cả dropdown ẩn
+            document.querySelectorAll("[id^='dropdownform']").forEach(el => el.classList.add('hidden'));
+
             if(mode === 'add') {
                 document.getElementById('modalTitle').innerText = "Thêm Thành Viên Mới";
                 document.getElementById('editId').value = "";
                 document.getElementById('deleteBtn').classList.add('hidden');
+                
+                // Reset giao diện hiển thị text hộp chọn Custom Dropdown
+                selectOption('formPosition', "", "");
+                selectOption('formTitle', "", "");
+                selectOption('formRegion', "", "");
             } else {
                 document.getElementById('modalTitle').innerText = "Cập Nhật Thông Tin";
                 document.getElementById('editId').value = id;
@@ -241,22 +323,38 @@
                 if(item) {
                     document.getElementById('formName').value = item.name;
                     document.getElementById('formPhone').value = item.phone;
-                    document.getElementById('formPosition').value = item.position_id;
-                    document.getElementById('formTitle').value = item.title_id;
-                    document.getElementById('formRegion').value = item.region_id || "";
+                    
+                    // Gán giá trị ID ẩn và hiển thị Text tương ứng lên hộp chọn
+                    const currentPos = categories.positions.find(p => p.id === item.position_id);
+                    if(currentPos) selectOption('formPosition', currentPos.id, currentPos.name);
+
+                    const currentTitle = categories.titles.find(t => t.id === item.title_id);
+                    if(currentTitle) selectOption('formTitle', currentTitle.id, currentTitle.name);
+
+                    if(item.region_id) {
+                        const currentReg = categories.regions.find(r => r.id === item.region_id);
+                        if(currentReg) selectOption('formRegion', currentReg.id, currentReg.name);
+                    } else {
+                        selectOption('formRegion', "", "");
+                    }
                 }
             }
         }
 
         function closeModal() { document.getElementById('contactModal').classList.add('hidden'); }
 
-        // --- 6. GỬI DỮ LIỆU LÊN ĐÁM MÂY KÈM CHÌA KHÓA XÁC THỰC ---
+        // --- 7. GỬI DỮ LIỆU LÊN ĐÁM MÂY KÈM CHÌA KHÓA XÁC THỰC RLS ---
         async function handleFormSubmit(e) {
             e.preventDefault();
             const id = document.getElementById('editId').value;
             const adminKey = document.getElementById('formAdminKey').value;
             
-            // Đóng gói payload đúng theo định dạng trường khóa ngoại (ID dạng số nguyên)
+            // Kiểm tra các trường bắt buộc đã được click chọn chưa
+            if(!document.getElementById('formPosition').value || !document.getElementById('formTitle').value) {
+                alert("Vui lòng chọn Chức vụ và Chức danh bằng cách gõ chọn trong ô!");
+                return;
+            }
+
             const payload = {
                 name: document.getElementById('formName').value.trim(),
                 phone: document.getElementById('formPhone').value.trim(),
@@ -265,7 +363,6 @@
                 region_id: document.getElementById('formRegion').value ? parseInt(document.getElementById('formRegion').value) : null
             };
 
-            // Tiêm mã bảo mật Header
             const clientWithAuth = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
                 global: { headers: { 'x-admin-key': adminKey } }
             });
@@ -286,7 +383,7 @@
             }
         }
 
-        // --- 7. HÀNH ĐỘNG XÓA ---
+        // --- 8. HÀNH ĐỘNG XÓA ---
         async function deleteContact() {
             const id = document.getElementById('editId').value;
             const adminKey = document.getElementById('formAdminKey').value;
@@ -304,7 +401,7 @@
             }
         }
 
-        // Khởi chạy khi tải trang
+        // Khởi chạy khi tải trang hoàn tất
         window.onload = async () => {
             await loadCategories();
             await loadContacts();
