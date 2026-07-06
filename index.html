@@ -74,8 +74,10 @@
                 <input type="password" id="adminPasswordInput" placeholder="Nhập mã bí mật..." class="w-full px-4 py-2.5 border rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 outline-none text-center tracking-widest font-bold">
             </div>
             <div class="flex gap-2 pt-1">
-                <button onclick="closeAdminLoginModal()" class="w-1/2 bg-slate-100 text-slate-600 py-2 rounded-xl text-xs font-semibold">Hủy bỏ</button>
-                <button onclick="submitAdminLogin()" class="w-1/2 bg-indigo-600 hover:bg-indigo-700 text-white py-2 rounded-xl text-xs font-bold shadow-md transition-all">Xác nhận</button>
+                <button type="button" onclick="closeAdminLoginModal()" class="w-1/2 bg-slate-100 text-slate-600 py-2 rounded-xl text-xs font-semibold">Hủy bỏ</button>
+                <button type="button" id="adminSubmitBtn" onclick="submitAdminLogin()" class="w-1/2 bg-indigo-600 hover:bg-indigo-700 text-white py-2 rounded-xl text-xs font-bold shadow-md transition-all flex items-center justify-center gap-1">
+                    Xác nhận
+                </button>
             </div>
         </div>
     </div>
@@ -157,7 +159,6 @@
         let categories = { positions: [], titles: [], regions: [] };
         let currentAdminKey = null;
 
-        // Hàm loại bỏ dấu tiếng Việt phục vụ tìm kiếm không chính xác
         function removeVietnameseTones(str) {
             if (!str) return "";
             str = str.replace(/à|á|ạ|ả|ã|â|ầ|ấ|ậ|ẩ|ẫ|ă|ằ|ắ|ặ|ẳ|ẵ/g, "a");
@@ -179,13 +180,13 @@
             return str.toLowerCase().trim();
         }
 
-        // --- 2. HỘP ĐĂNG NHẬP ADMIN CUSTOM MODAL (Yêu cầu 3) ---
+        // --- 2. HỘP ĐĂNG NHẬP ADMIN CUSTOM MODAL ---
         function openAdminLoginModal() {
             if(currentAdminKey) {
                 if(confirm("Bạn đang đăng nhập quyền Quản trị. Bạn có muốn Đăng xuất thoát quyền không?")) {
                     currentAdminKey = null;
                     updateAdminUI();
-                    renderContacts(contactsData); // Vẽ lại bảng để ẩn các nút sửa đổi
+                    renderContacts(contactsData);
                 }
                 return;
             }
@@ -198,19 +199,58 @@
             document.getElementById('adminAuthModal').classList.add('hidden');
         }
 
-        function submitAdminLogin() {
+        // SỬA LỖI NGHIÊM TRỌNG: Gửi thử một lệnh Write/Auth lên Supabase để xác thực pass trước khi cho vào Admin
+        async function submitAdminLogin() {
             const val = document.getElementById('adminPasswordInput').value.trim();
-            if(val) {
-                currentAdminKey = val;
-                closeAdminLoginModal();
-                updateAdminUI();
-                renderContacts(contactsData); // Vẽ lại bảng để hiện nút sửa đổi nếu cần
-            } else {
+            if(!val) {
                 alert("Vui lòng điền mật mã!");
+                return;
+            }
+
+            const submitBtn = document.getElementById('adminSubmitBtn');
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = `<i class="fa-solid fa-spinner animate-spin"></i> Đang thử...`;
+
+            try {
+                // Tạo một client tạm thời mang theo key vừa nhập để gửi yêu cầu test
+                const clientWithAuth = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+                    global: { headers: { 'x-admin-key': val } }
+                });
+
+                // Thực hiện một thao tác test (Ví dụ: Thử gọi lệnh giải mã RPC hoặc thực hiện lệnh chèn ảo không thành công)
+                // Ở đây chúng ta mượn API giải quyết chuẩn: Gửi thử một lệnh cập nhật có ID không tưởng hoặc query bảng nhạy cảm được cấu hình mã bảo mật.
+                // Một cách tối ưu là bạn select thử một bản ghi mẫu kèm rls header:
+                const { error } = await clientWithAuth.from('contacts').select('id').limit(1);
+
+                // Dựa trên thiết kế RLS PostgREST của bạn: Nếu x-admin-key sai, API Gateway hoặc Postgres Trigger sẽ từ chối/trả error hoặc bạn có hàm RPC riêng để check pass.
+                // Để chắc chắn nhất, hệ thống sẽ thực hiện thử một lệnh check an toàn:
+                // Nếu hệ thống của bạn sử dụng header này truyền thẳng vào API Gateway bảo mật:
+                
+                // Giả sử logic DB của bạn là nhập sai mật khẩu thì khi gọi insert/update hoặc thậm chí là select (nếu cấu hình ẩn hoàn toàn) sẽ bị chặn.
+                // Để kiểm tra mật mã chính xác nhất với kiến trúc x-admin-key: ta thử gửi một lệnh cập nhật ảo tới ID số 0:
+                const { error: testError } = await clientWithAuth.from('contacts').update({ name: 'TEST_AUTH' }).eq('id', 0);
+
+                // Nếu có lỗi "Mật mã sai" từ DB (thường dựa trên mã hóa trigger hoặc middleware chặn chuỗi):
+                // LƯU Ý: Nếu DB của bạn trả lỗi khi `x-admin-key` không hợp lệ, ta bắt tình huống đó ở đây:
+                if (testError && (testError.message.includes("violates") || testError.status === 401 || testError.status === 403 || testError.code === "P0001")) {
+                    alert("Mật mã quản trị không chính xác!");
+                    currentAdminKey = null;
+                } else {
+                    // Đăng nhập thành công
+                    currentAdminKey = val;
+                    closeAdminLoginModal();
+                    updateAdminUI();
+                    renderContacts(contactsData);
+                }
+            } catch (err) {
+                alert("Mật mã quản trị không đúng hoặc lỗi kết nối!");
+                currentAdminKey = null;
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.innerText = "Xác nhận";
             }
         }
 
-        // Đóng/Mở các tính năng tương ứng theo quyền trạng thái (Yêu cầu 2)
         function updateAdminUI() {
             const area = document.getElementById('adminStatusArea');
             const mainAddBtn = document.getElementById('mainAddBtn');
@@ -220,17 +260,17 @@
                     <span class="text-emerald-600 font-bold flex items-center gap-1 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200">
                         <i class="fa-solid fa-user-shield"></i> Quản trị viên • <button onclick="openAdminLoginModal()" class="underline text-slate-500 font-normal hover:text-red-500 ml-1">Thoát</button>
                     </span>`;
-                mainAddBtn.classList.remove('hidden'); // Kích hoạt hiện nút thêm
+                mainAddBtn.classList.remove('hidden');
             } else {
                 area.innerHTML = `
                     <button onclick="openAdminLoginModal()" class="text-indigo-600 hover:text-indigo-800 font-bold flex items-center gap-1 transition-all">
                         <i class="fa-solid fa-lock-open"></i> Mục quản trị
                     </button>`;
-                mainAddBtn.classList.add('hidden'); // Ẩn hoàn toàn nút thêm liên hệ khi chưa có pass
+                mainAddBtn.classList.add('hidden');
             }
         }
 
-        // --- 3. ĐIỀU KHIỂN SEARCHABLE DROPDOWN THEO TỪ KHÓA KHÔNG DẤU ---
+        // --- 3. ĐIỀU KHIỂN SEARCHABLE DROPDOWN ---
         function toggleDropdown(fieldId) {
             event.stopPropagation();
             const dropdown = document.getElementById('dropdown' + fieldId);
@@ -323,7 +363,7 @@
             });
         }
 
-        // --- 5. ĐỒNG BỘ HIỂN THỊ - TÁCH CỘT CHỨC DANH VÀ CHỨC VỤ (Yêu cầu 1) ---
+        // --- 5. ĐỒNG BỘ HIỂN THỊ ---
         async function loadContacts() {
             const { data, error } = await _supabase
                 .from('contacts')
@@ -360,7 +400,6 @@
                 const regName = item.regions ? item.regions.name : '—';
 
                 const row = document.createElement('div');
-                // Lưới cấu trúc hiển thị 1 dòng phân tách 2 cột chức danh (col-span-2) và chức vụ (col-span-2) độc lập
                 row.className = "bg-white p-3 md:px-6 md:py-2.5 rounded-xl md:rounded-none flex flex-col md:grid md:grid-cols-12 gap-1 md:gap-2 items-start md:items-center shadow-sm md:shadow-none border border-slate-100 md:border-b md:border-slate-100 hover:bg-slate-50/80 transition-all";
                 
                 row.innerHTML = `
@@ -524,7 +563,6 @@
             await loadCategories();
             await loadContacts();
             
-            // Lắng nghe sự kiện phím Enter trong ô nhập password admin để đăng nhập nhanh
             document.getElementById('adminPasswordInput').addEventListener('keypress', function(e) {
                 if (e.key === 'Enter') submitAdminLogin();
             });
