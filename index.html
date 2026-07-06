@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Danh Bạ Thông Minh Cloud</title>
+    <title>Danh bạ BCĐ26</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -15,16 +15,16 @@
 </head>
 <body class="bg-slate-950 min-h-screen py-4 px-2 sm:p-6 flex justify-center items-center">
 
-    <div class="w-full max-w-4xl bg-white rounded-3xl shadow-2xl overflow-hidden flex flex-col h-[92vh] max-h-[850px]">
+    <div class="w-full max-w-5xl bg-white rounded-3xl shadow-2xl overflow-hidden flex flex-col h-[92vh] max-h-[850px]">
         <div class="bg-gradient-to-r from-slate-800 to-indigo-950 p-5 text-white shrink-0">
             <div class="flex justify-between items-center">
                 <div>
                     <h1 class="text-xl sm:text-2xl font-black tracking-tight flex items-center gap-2">
-                        <i class="fa-solid fa-address-book text-amber-400"></i> DANH BẠ NỘI BỘ
+                        <i class="fa-solid fa-address-book text-amber-400"></i> DANH BẠ BCĐ26
                     </h1>
-                    <p class="text-slate-300 text-xs mt-0.5">Hệ thống lưu trữ dữ liệu đám mây tập trung</p>
+                    <p class="text-slate-300 text-xs mt-0.5">Danh bạ phục vụ các Tổ Công tác BCĐ26</p>
                 </div>
-                <button id="mainAddBtn" onclick="checkAdminBeforeAction('add')" class="bg-white/10 hover:bg-white/20 text-white px-3 py-2 rounded-xl flex items-center gap-1.5 text-xs sm:text-sm font-semibold transition-all">
+                <button id="mainAddBtn" onclick="openModal('add')" class="bg-amber-500 text-slate-950 px-3 py-2 rounded-xl flex items-center gap-1.5 text-xs sm:text-sm font-bold shadow-md hover:bg-amber-400 transition-all hidden">
                     <i class="fa-solid fa-plus"></i> Thêm thành viên
                 </button>
             </div>
@@ -41,7 +41,7 @@
             <span id="counter" class="font-bold">Đang tải dữ liệu...</span>
             
             <div id="adminStatusArea">
-                <button onclick="promptAdminLogin()" class="text-indigo-600 hover:text-indigo-800 font-bold flex items-center gap-1 transition-all">
+                <button onclick="openAdminLoginModal()" class="text-indigo-600 hover:text-indigo-800 font-bold flex items-center gap-1 transition-all">
                     <i class="fa-solid fa-lock-open"></i> Mục quản trị
                 </button>
             </div>
@@ -49,14 +49,34 @@
 
         <div class="hidden md:grid grid-cols-12 gap-2 px-6 py-2 bg-slate-100 text-slate-500 text-xs font-bold uppercase tracking-wider shrink-0 border-b border-slate-200">
             <div class="col-span-3">Họ và Tên</div>
-            <div class="col-span-3">Chức danh / Chức vụ</div>
-            <div class="col-span-3">Địa bàn</div>
+            <div class="col-span-2">Chức danh</div>
+            <div class="col-span-2">Chức vụ</div>
+            <div class="col-span-2">Địa bàn</div>
             <div class="col-span-2">Số điện thoại</div>
             <div class="col-span-1 text-center">Thao tác</div>
         </div>
 
         <div id="contactList" class="flex-1 overflow-y-auto p-3 md:p-4 space-y-2 bg-slate-50/50">
             <div class="text-center py-12 text-slate-400 text-sm">Đang đồng bộ cơ sở dữ liệu đám mây...</div>
+        </div>
+    </div>
+
+    <div id="adminAuthModal" class="fixed inset-0 bg-slate-950/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white w-full max-w-sm rounded-3xl shadow-2xl p-6 space-y-4">
+            <div class="text-center">
+                <div class="w-12 h-12 bg-indigo-50 text-indigo-600 rounded-full flex items-center justify-center text-xl mx-auto mb-2 shadow-inner">
+                    <i class="fa-solid fa-shield-halved"></i>
+                </div>
+                <h3 class="text-base font-bold text-slate-800">Xác thực quyền Quản trị viên</h3>
+                <p class="text-slate-400 text-xs mt-0.5">Vui lòng nhập mật mã cấu hình RLS bảo mật</p>
+            </div>
+            <div>
+                <input type="password" id="adminPasswordInput" placeholder="Nhập mã bí mật..." class="w-full px-4 py-2.5 border rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 outline-none text-center tracking-widest font-bold">
+            </div>
+            <div class="flex gap-2 pt-1">
+                <button onclick="closeAdminLoginModal()" class="w-1/2 bg-slate-100 text-slate-600 py-2 rounded-xl text-xs font-semibold">Hủy bỏ</button>
+                <button onclick="submitAdminLogin()" class="w-1/2 bg-indigo-600 hover:bg-indigo-700 text-white py-2 rounded-xl text-xs font-bold shadow-md transition-all">Xác nhận</button>
+            </div>
         </div>
     </div>
 
@@ -135,15 +155,15 @@
         
         let contactsData = [];
         let categories = { positions: [], titles: [], regions: [] };
-        let currentAdminKey = null; // Lưu trữ mật mã Admin Token sau khi đăng nhập thành công một lần
+        let currentAdminKey = null;
 
-        // Hàm loại bỏ dấu tiếng Việt để tìm kiếm không chính xác (Mục tiêu 1)
+        // Hàm loại bỏ dấu tiếng Việt phục vụ tìm kiếm không chính xác
         function removeVietnameseTones(str) {
             if (!str) return "";
             str = str.replace(/à|á|ạ|ả|ã|â|ầ|ấ|ậ|ẩ|ẫ|ă|ằ|ắ|ặ|ẳ|ẵ/g, "a");
             str = str.replace(/è|é|ẹ|ẻ|ẽ|ê|ề|ế|ệ|ể|ễ/g, "e");
             str = str.replace(/ì|í|ị|ỉ|ĩ/g, "i");
-            str = str.replace(/ò|á|ọ|ỏ|õ|ô|ồ|ố|ộ|ổ|ỗ|ơ|ờ|ớ|ợ|ở|ỡ/g, "o");
+            str = str.replace(/ò|ó|ọ|ỏ|õ|ô|ồ|ố|ộ|ổ|ỗ|ơ|ờ|ớ|ợ|ở|ỡ/g, "o");
             str = str.replace(/ù|ú|ụ|ủ|ũ|ư|ừ|ứ|ự|ử|ữ/g, "u");
             str = str.replace(/ỳ|ý|ỵ|ỷ|ỹ/g, "y");
             str = str.replace(/đ/g, "d");
@@ -154,31 +174,43 @@
             str = str.replace(/Ù|Ú|Ụ|Ủ|Ũ|Ư|Ừ|Ứ|Ự|Ử|Ữ/g, "U");
             str = str.replace(/Ỳ|Ý|Ỵ|Ỷ|Ỹ/g, "Y");
             str = str.replace(/Đ/g, "D");
-            // Loại bỏ các ký tự dấu phụ kết hợp
             str = str.replace(/\u0300|\u0301|\u0309|\u0303|\u0323/g, ""); 
             str = str.replace(/\u02C6|\u0306|\u031B/g, ""); 
             return str.toLowerCase().trim();
         }
 
-        // --- 2. LOGIC ĐĂNG NHẬP ADMIN MỘT LẦN (Mục tiêu 4) ---
-        function promptAdminLogin() {
+        // --- 2. HỘP ĐĂNG NHẬP ADMIN CUSTOM MODAL (Yêu cầu 3) ---
+        function openAdminLoginModal() {
             if(currentAdminKey) {
-                if(confirm("Bạn đang ở chế độ Quản trị viên. Bạn có muốn Đăng xuất thoát quyền không?")) {
+                if(confirm("Bạn đang đăng nhập quyền Quản trị. Bạn có muốn Đăng xuất thoát quyền không?")) {
                     currentAdminKey = null;
                     updateAdminUI();
+                    renderContacts(contactsData); // Vẽ lại bảng để ẩn các nút sửa đổi
                 }
                 return;
             }
-            
-            const key = prompt("Nhập mật mã xác thực để kích hoạt Quyền Quản trị viên:");
-            if (key) {
-                currentAdminKey = key;
+            document.getElementById('adminPasswordInput').value = '';
+            document.getElementById('adminAuthModal').classList.remove('hidden');
+            document.getElementById('adminPasswordInput').focus();
+        }
+
+        function closeAdminLoginModal() {
+            document.getElementById('adminAuthModal').classList.add('hidden');
+        }
+
+        function submitAdminLogin() {
+            const val = document.getElementById('adminPasswordInput').value.trim();
+            if(val) {
+                currentAdminKey = val;
+                closeAdminLoginModal();
                 updateAdminUI();
-                // Tải lại danh bạ để cập nhật hiển thị các nút chức năng ẩn/hiện
-                renderContacts(contactsData);
+                renderContacts(contactsData); // Vẽ lại bảng để hiện nút sửa đổi nếu cần
+            } else {
+                alert("Vui lòng điền mật mã!");
             }
         }
 
+        // Đóng/Mở các tính năng tương ứng theo quyền trạng thái (Yêu cầu 2)
         function updateAdminUI() {
             const area = document.getElementById('adminStatusArea');
             const mainAddBtn = document.getElementById('mainAddBtn');
@@ -186,28 +218,19 @@
             if(currentAdminKey) {
                 area.innerHTML = `
                     <span class="text-emerald-600 font-bold flex items-center gap-1 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200">
-                        <i class="fa-solid fa-user-shield"></i> Chế độ: Quản trị • <button onclick="promptAdminLogin()" class="underline text-slate-500 font-normal hover:text-red-500 ml-1">Đăng xuất</button>
+                        <i class="fa-solid fa-user-shield"></i> Quản trị viên • <button onclick="openAdminLoginModal()" class="underline text-slate-500 font-normal hover:text-red-500 ml-1">Thoát</button>
                     </span>`;
-                mainAddBtn.classList.remove('bg-white/10', 'text-white/70');
-                mainAddBtn.classList.add('bg-amber-500', 'text-slate-950', 'hover:bg-amber-400');
+                mainAddBtn.classList.remove('hidden'); // Kích hoạt hiện nút thêm
             } else {
                 area.innerHTML = `
-                    <button onclick="promptAdminLogin()" class="text-indigo-600 hover:text-indigo-800 font-bold flex items-center gap-1 transition-all">
+                    <button onclick="openAdminLoginModal()" class="text-indigo-600 hover:text-indigo-800 font-bold flex items-center gap-1 transition-all">
                         <i class="fa-solid fa-lock-open"></i> Mục quản trị
                     </button>`;
-                mainAddBtn.className = "bg-white/10 hover:bg-white/20 text-white px-3 py-2 rounded-xl flex items-center gap-1.5 text-xs sm:text-sm font-semibold transition-all";
+                mainAddBtn.classList.add('hidden'); // Ẩn hoàn toàn nút thêm nhân sự khi chưa có pass
             }
         }
 
-        function checkAdminBeforeAction(mode, id = null) {
-            if(!currentAdminKey) {
-                alert("Hệ thống đang ở chế độ xem. Vui lòng bấm vào 'Mục quản trị' ở góc dưới và nhập mật mã trước khi thực hiện!");
-                return;
-            }
-            openModal(mode, id);
-        }
-
-        // --- 3. ĐIỀU KHIỂN SEARCHABLE DROPDOWN (TÌM KIẾM DANH MỤC KHÔNG DẤU) ---
+        // --- 3. ĐIỀU KHIỂN SEARCHABLE DROPDOWN THEO TỪ KHÓA KHÔNG DẤU ---
         function toggleDropdown(fieldId) {
             event.stopPropagation();
             const dropdown = document.getElementById('dropdown' + fieldId);
@@ -231,7 +254,7 @@
 
         function filterDropdown(fieldId) {
             const input = document.getElementById('dropdown' + fieldId).querySelector('input');
-            const filter = removeVietnameseTones(input.value); // Tìm kiếm không dấu danh mục
+            const filter = removeVietnameseTones(input.value);
             const optionItems = document.getElementById('options' + fieldId).getElementsByClassName('option-item');
             
             for (let i = 0; i < optionItems.length; i++) {
@@ -262,7 +285,7 @@
             document.getElementById('dropdown' + fieldId).classList.add('hidden');
         }
 
-        // --- 4. TẢI DANH MỤC BAN ĐẦU ---
+        // --- 4. TẢI DANH MỤC GỐC ---
         async function loadCategories() {
             const [posRes, titleRes, regRes] = await Promise.all([
                 _supabase.from('positions').select('id, name').order('name'),
@@ -300,7 +323,7 @@
             });
         }
 
-        // --- 5. ĐỒNG BỘ DANH SÁCH - HIỂN THỊ TRÊN MỘT DÒNG (Mục tiêu 2, 3) ---
+        // --- 5. ĐỒNG BỘ HIỂN THỊ - TÁCH CỘT CHỨC DANH VÀ CHỨC VỤ (Yêu cầu 1) ---
         async function loadContacts() {
             const { data, error } = await _supabase
                 .from('contacts')
@@ -337,7 +360,7 @@
                 const regName = item.regions ? item.regions.name : '—';
 
                 const row = document.createElement('div');
-                // Giao diện co giãn: Mobile hiển thị dạng khối hàng ngang thu gọn, Desktop hiển thị dạng bảng lưới grid 12 cột chuẩn chỉnh trên 1 dòng
+                // Lưới cấu trúc hiển thị 1 dòng phân tách 2 cột chức danh (col-span-2) và chức vụ (col-span-2) độc lập
                 row.className = "bg-white p-3 md:px-6 md:py-2.5 rounded-xl md:rounded-none flex flex-col md:grid md:grid-cols-12 gap-1 md:gap-2 items-start md:items-center shadow-sm md:shadow-none border border-slate-100 md:border-b md:border-slate-100 hover:bg-slate-50/80 transition-all";
                 
                 row.innerHTML = `
@@ -348,11 +371,15 @@
                         <span class="truncate">${item.name}</span>
                     </div>
                     
-                    <div class="col-span-3 text-xs md:text-sm text-indigo-600 font-medium">
-                        <span class="md:hidden text-slate-400 font-normal">Chức vụ: </span>${titleName} • ${posName}
+                    <div class="col-span-2 text-xs md:text-sm text-indigo-600 font-medium">
+                        <span class="md:hidden text-slate-400 font-normal">Chức danh: </span>${titleName}
+                    </div>
+
+                    <div class="col-span-2 text-xs md:text-sm text-slate-600 font-medium">
+                        <span class="md:hidden text-slate-400 font-normal">Chức vụ: </span>${posName}
                     </div>
                     
-                    <div class="col-span-3 text-xs md:text-sm text-slate-500 font-medium truncate w-full">
+                    <div class="col-span-2 text-xs md:text-sm text-slate-500 font-medium truncate w-full">
                         <span class="md:hidden text-slate-400 font-normal">Địa bàn: </span>${regName}
                     </div>
                     
@@ -363,7 +390,7 @@
                     
                     <div class="col-span-1 flex items-center justify-end md:justify-center gap-2 w-full mt-2 md:mt-0 pt-2 md:pt-0 border-t border-slate-50 md:border-none shrink-0">
                         ${currentAdminKey ? `
-                            <button onclick="checkAdminBeforeAction('edit', ${item.id})" class="text-xs font-semibold px-2 py-1 bg-amber-50 text-amber-700 border border-amber-200 rounded-lg hover:bg-amber-100 flex items-center gap-1" title="Sửa thông tin nhân sự">
+                            <button onclick="openModal('edit', ${item.id})" class="text-xs font-semibold px-2 py-1 bg-amber-50 text-amber-700 border border-amber-200 rounded-lg hover:bg-amber-100 flex items-center gap-1" title="Sửa thông tin nhân sự">
                                 <i class="fa-solid fa-pen-to-square"></i>Sửa
                             </button>
                         ` : ''}
@@ -376,7 +403,7 @@
             });
         }
 
-        // --- 6. TÌM KIẾM KHÔNG DẤU ĐA TRƯỜNG DỮ LIỆU (Mục tiêu 1) ---
+        // --- 6. TÌM KIẾM ĐA TRƯỜNG DỮ LIỆU KHÔNG DẤU ---
         function filterContacts() {
             const query = removeVietnameseTones(document.getElementById('searchInput').value);
             
@@ -437,7 +464,7 @@
 
         function closeModal() { document.getElementById('contactModal').classList.add('hidden'); }
 
-        // --- 8. GỬI DỮ LIỆU LÊN ĐÁM MÂY KÈM CHÌA KHÓA LƯU TRONG PHIÊN SỬ DỤNG ---
+        // --- 8. GỬI DỮ LIỆU LÊN CLOUD ---
         async function handleFormSubmit(e) {
             e.preventDefault();
             const id = document.getElementById('editId').value;
@@ -455,7 +482,6 @@
                 region_id: document.getElementById('formRegion').value ? parseInt(document.getElementById('formRegion').value) : null
             };
 
-            // Sử dụng Token Admin đã lưu khi đăng nhập thành công từ trước
             const clientWithAuth = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
                 global: { headers: { 'x-admin-key': currentAdminKey } }
             });
@@ -468,7 +494,7 @@
             }
 
             if(result.error) {
-                alert("Lỗi thao tác! Mật mã quản trị của bạn không chính xác hoặc hết hạn quyền.");
+                alert("Lỗi thao tác! Mật mã quản trị không đúng hoặc phiên làm việc hết hạn quyền.");
                 console.error(result.error);
             } else {
                 closeModal();
@@ -479,7 +505,7 @@
         // --- 9. HÀNH ĐỘNG XÓA ---
         async function deleteContact() {
             const id = document.getElementById('editId').value;
-            if(id && confirm("Bạn có thực sự chắc chắn muốn xóa vĩnh viễn nhân sự này khỏi hệ thống không?")) {
+            if(id && confirm("Bạn có thực sự chắc chắn muốn xóa vĩnh viễn nhân sự này không?")) {
                 const clientWithAuth = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
                     global: { headers: { 'x-admin-key': currentAdminKey } }
                 });
@@ -497,6 +523,11 @@
             updateAdminUI();
             await loadCategories();
             await loadContacts();
+            
+            // Lắng nghe sự kiện phím Enter trong ô nhập password admin để đăng nhập nhanh
+            document.getElementById('adminPasswordInput').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') submitAdminLogin();
+            });
         };
     </script>
 </body>
