@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Danh Bạ Nhanh Toàn Diện</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* Tối ưu hóa thanh cuộn cho danh sách */
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #f1f5f9;
+            border-radius: 10px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 10px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+    </style>
+</head>
+<body class="bg-slate-900 min-h-screen py-6 px-4 flex justify-center items-center font-sans antialiased">
+
+    <!-- Container Chính -->
+    <div class="w-full max-w-lg bg-white rounded-3xl shadow-2xl overflow-hidden border border-slate-100 flex flex-col h-[90vh] max-h-[800px]">
+        
+        <!-- Header Ứng Dụng -->
+        <div class="bg-gradient-to-r from-blue-600 to-indigo-700 p-6 text-white relative shrink-0">
+            <div class="flex justify-between items-center">
+                <div>
+                    <h1 class="text-2xl font-black tracking-tight flex items-center gap-2">
+                        <i class="fa-solid fa-address-book text-yellow-400"></i> DANH BẠ NHANH
+                    </h1>
+                    <p class="text-blue-100 text-xs mt-1 font-medium">Quản lý nội bộ • Không cần Hosting • Lưu local</p>
+                </div>
+                <!-- Nút Mở Form Thêm Thành Viên -->
+                <button onclick="openModal('add')" class="bg-white/20 hover:bg-white/30 text-white w-10 h-10 rounded-2xl flex items-center justify-center transition-all active:scale-95 shadow-lg backdrop-blur-sm">
+                    <i class="fa-solid fa-plus text-lg"></i>
+                </button>
+            </div>
+
+            <!-- Thanh Tìm Kiếm Đa Năng -->
+            <div class="relative mt-5">
+                <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 text-slate-400">
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                </span>
+                <input type="text" id="searchInput" onkeyup="filterContacts()" placeholder="Tìm theo tên, số điện thoại, phòng ban..." class="w-full pl-10 pr-10 py-3 bg-white text-slate-800 rounded-2xl focus:outline-none focus:ring-4 focus:ring-blue-300 shadow-inner text-sm placeholder:text-slate-400 transition-all">
+                <button onclick="clearSearch()" id="clearBtn" class="absolute inset-y-0 right-0 flex items-center pr-3.5 text-slate-400 hover:text-slate-600 hidden">
+                    <i class="fa-solid fa-circle-xmark"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Thống kê nhanh số lượng -->
+        <div class="bg-slate-50 px-6 py-2 border-b border-slate-100 flex justify-between items-center text-xs font-semibold text-slate-500 shrink-0">
+            <span id="counter">Tổng số: 0 thành viên</span>
+            <span class="text-amber-600 flex items-center gap-1"><i class="fa-solid fa-database"></i> Dữ liệu tự động lưu</span>
+        </div>
+
+        <!-- Danh Sách Thành Viên (Cuộn tự nhiên) -->
+        <div id="contactList" class="flex-1 overflow-y-auto p-4 space-y-2.5 custom-scrollbar bg-slate-50/50">
+            <!-- Dữ liệu JS sẽ tự động đổ vào đây -->
+        </div>
+    </div>
+
+    <!-- MODAL FORM (Dùng chung cho cả Thêm và Sửa) -->
+    <div id="contactModal" class="fixed inset-0 bg-slate-950/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white w-full max-w-md rounded-3xl shadow-2xl border border-slate-100 overflow-hidden transform scale-95 transition-all duration-300">
+            <!-- Modal Header -->
+            <div class="bg-slate-50 px-6 py-4 border-b border-slate-100 flex justify-between items-center">
+                <h3 id="modalTitle" class="text-lg font-bold text-slate-800">Thêm Thành Viên Mới</h3>
+                <button onclick="closeModal()" class="text-slate-400 hover:text-slate-600 p-1"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+            
+            <!-- Modal Body / Form -->
+            <form id="contactForm" onsubmit="handleFormSubmit(event)" class="p-6 space-y-4">
+                <input type="hidden" id="editIndex">
+                
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-1">Họ và Tên <span class="text-red-500">*</span></label>
+                    <input type="text" id="formName" required placeholder="Ví dụ: Nguyễn Văn A" class="w-full px-4 py-2.5 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-1">Số điện thoại <span class="text-red-500">*</span></label>
+                    <input type="tel" id="formPhone" required placeholder="Ví dụ: 0901234567" class="w-full px-4 py-2.5 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-1">Phòng ban / Chức vụ</label>
+                    <input type="text" id="formDept" placeholder="Ví dụ: Phòng Nhân Sự" class="w-full px-4 py-2.5 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-1">Email công việc</label>
+                    <input type="email" id="formEmail" placeholder="Ví dụ: name@company.com" class="w-full px-4 py-2.5 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm">
+                </div>
+
+                <!-- Footer nút bấm trong form -->
+                <div class="flex justify-between items-center pt-4 border-t border-slate-100 gap-3">
+                    <button type="button" id="deleteBtn" onclick="deleteContact()" class="bg-rose-50 hover:bg-rose-100 text-rose-600 px-4 py-2.5 rounded-xl font-semibold text-sm flex items-center gap-1.5 transition-all hidden">
+                        <i class="fa-solid fa-trash-can"></i> Xóa
+                    </button>
+                    <div class="flex items-center gap-2 ml-auto">
+                        <button type="button" onclick="closeModal()" class="bg-slate-100 hover:bg-slate-200 text-slate-600 px-4 py-2.5 rounded-xl font-semibold text-sm transition-all">Hủy</button>
+                        <button type="submit" id="saveBtn" class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-xl font-semibold text-sm shadow-md shadow-blue-200 transition-all">Lưu lại</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Trình xử lý logic ứng dụng (JavaScript) -->
+    <script>
+        // Khởi tạo danh sách danh bạ ban đầu nếu LocalStorage trống
+        const defaultContacts = [
+            { name: "Nguyễn Văn A", phone: "0901234567", dept: "Phòng Nhân Sự", email: "vanya@company.com" },
+            { name: "Trần Thị B", phone: "0918888888", dept: "Phòng Kế Toán", email: "thib@company.com" },
+            { name: "Lê Hoàng C", phone: "0987654321", dept: "Phòng Kỹ Thuật", email: "hoangc@company.com" }
+        ];
+
+        let contacts = JSON.parse(localStorage.getItem('contacts'));
+        if (!contacts) {
+            contacts = defaultContacts;
+            localStorage.setItem('contacts', JSON.stringify(contacts));
+        }
+
+        // Đổ dữ liệu ra giao diện HTML
+        function renderContacts() {
+            const listContainer = document.getElementById('contactList');
+            listContainer.innerHTML = '';
+
+            if (contacts.length === 0) {
+                listContainer.innerHTML = `
+                    <div class="text-center py-12 text-slate-400">
+                        <i class="fa-solid fa-folder-open text-4xl mb-2 block"></i>
+                        <span class="text-sm">Danh bạ trống. Bấm dấu (+) để thêm!</span>
+                    </div>`;
+                document.getElementById('counter').innerText = "Tổng số: 0 thành viên";
+                return;
+            }
+
+            contacts.forEach((contact, index) => {
+                const firstLetter = contact.name.trim().charAt(0).toUpperCase();
+                
+                // Mảng màu ngẫu nhiên cho Avatar đẹp mắt
+                const colors = [
+                    'bg-blue-100 text-blue-600', 'bg-emerald-100 text-emerald-600', 
+                    'bg-purple-100 text-purple-600', 'bg-amber-100 text-amber-600', 
+                    'bg-rose-100 text-rose-600', 'bg-cyan-100 text-cyan-600'
+                ];
+                const colorClass = colors[index % colors.length];
+
+                const li = document.createElement('div');
+                li.className = "bg-white p-3.5 rounded-2xl flex items-center justify-between shadow-sm border border-slate-100 hover:shadow-md transition-all duration-200 group contact-card";
+                li.setAttribute('data-index', index);
+
+                li.innerHTML = `
+                    <div class="flex items-center space-x-3.5 min-w-0">
+                        <!-- Avatar đại diện chữ cái đầu -->
+                        <div class="w-11 h-11 ${colorClass} rounded-2xl flex items-center justify-center font-black text-lg shrink-0 shadow-sm">
+                            ${firstLetter}
+                        </div>
+                        <!-- Thông tin chi tiết -->
+                        <div class="min-w-0">
+                            <h4 class="font-bold text-slate-800 text-sm md:text-base truncate contact-name">${contact.name}</h4>
+                            <p class="text-slate-400 text-xs flex items-center gap-1 mt-0.5 contact-dept">
+                                <i class="fa-solid fa-briefcase text-slate-300 text-[10px]"></i> ${contact.dept || 'Chưa phân phòng'}
+                            </p>
+                        </div>
+                    </div>
+                    
+                    <!-- Các nút tương tác nhanh -->
+                    <div class="flex items-center gap-1.5 shrink-0">
+                        <!-- Nút Sửa (Ẩn mặc định, hiện khi rê chuột hoặc trên mobile) -->
+                        <button onclick="openModal('edit', ${index})" class="w-9 h-9 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-xl flex items-center justify-center transition-all" title="Sửa thông tin">
+                            <i class="fa-solid fa-pen-to-square text-sm"></i>
+                        </button>
+                        <!-- Nút gọi điện trực tiếp -->
+                        <a href="tel:${contact.phone}" class="w-9 h-9 bg-emerald-50 text-emerald-600 hover:bg-emerald-100 rounded-xl flex items-center justify-center transition-all shadow-sm active:scale-90" title="Gọi ngay">
+                            <i class="fa-solid fa-phone text-sm"></i>
+                        </a>
+                    </div>
+                    <!-- Dữ liệu ẩn để phục vụ tìm kiếm nhanh -->
+                    <span class="hidden contact-phone">${contact.phone}</span>
+                `;
+                listContainer.appendChild(li);
+            });
+
+            document.getElementById('counter').innerText = `Tổng số: ${contacts.length} thành viên`;
+        }
+
+        // Tìm kiếm nhanh real-time
+        function filterContacts() {
+            const query = document.getElementById('searchInput').value.toLowerCase().trim();
+            const cards = document.getElementsByClassName('contact-card');
+            const clearBtn = document.getElementById('clearBtn');
+
+            if (query !== '') {
+                clearBtn.classList.remove('hidden');
+            } else {
+                clearBtn.classList.add('hidden');
+            }
+
+            for (let i = 0; i < cards.length; i++) {
+                const name = cards[i].querySelector('.contact-name').innerText.toLowerCase();
+                const dept = cards[i].querySelector('.contact-dept').innerText.toLowerCase();
+                const phone = cards[i].querySelector('.contact-phone').innerText;
+
+                if (name.includes(query) || dept.includes(query) || phone.includes(query)) {
+                    cards[i].style.setProperty('display', 'flex', 'important');
+                } else {
+                    cards[i].style.setProperty('display', 'none', 'important');
+                }
+            }
+        }
+
+        function clearSearch() {
+            document.getElementById('searchInput').value = '';
+            document.getElementById('clearBtn').add('hidden');
+            filterContacts();
+        }
+
+        // Điều khiển đóng mở Modal Form
+        function openModal(mode, index = null) {
+            const modal = document.getElementById('contactModal');
+            const form = document.getElementById('contactForm');
+            const title = document.getElementById('modalTitle');
+            const deleteBtn = document.getElementById('deleteBtn');
+            
+            form.reset();
+            modal.classList.remove('hidden');
+
+            if (mode === 'add') {
+                title.innerText = "Thêm Thành Viên Mới";
+                document.getElementById('editIndex').value = "";
+                deleteBtn.classList.add('hidden');
+            } else if (mode === 'edit' && index !== null) {
+                title.innerText = "Cập Nhật Thông Tin";
+                document.getElementById('editIndex').value = index;
+                deleteBtn.classList.remove('hidden');
+
+                // Điền dữ liệu cũ vào form
+                document.getElementById('formName').value = contacts[index].name;
+                document.getElementById('formPhone').value = contacts[index].phone;
+                document.getElementById('formDept').value = contacts[index].dept || '';
+                document.getElementById('formEmail').value = contacts[index].email || '';
+            }
+        }
+
+        function closeModal() {
+            document.getElementById('contactModal').classList.add('hidden');
+        }
+
+        // Xử lý Sự kiện Thêm hoặc Cập Nhật khi submit form
+        function handleFormSubmit(event) {
+            event.preventDefault();
+            const index = document.getElementById('editIndex').value;
+            
+            const newContact = {
+                name: document.getElementById('formName').value.trim(),
+                phone: document.getElementById('formPhone').value.trim(),
+                dept: document.getElementById('formDept').value.trim(),
+                email: document.getElementById('formEmail').value.trim()
+            };
+
+            if (index === "") {
+                // Hành động THÊM MỚI
+                contacts.push(newContact);
+            } else {
+                // Hành động CẬP NHẬT SỬA
+                contacts[parseInt(index)] = newContact;
+            }
+
+            // Lưu vào bộ nhớ máy và vẽ lại giao diện
+            localStorage.setItem('contacts', JSON.stringify(contacts));
+            renderContacts();
+            closeModal();
+        }
+
+        // Hành động XÓA nhân sự
+        function deleteContact() {
+            const index = document.getElementById('editIndex').value;
+            if (index !== "") {
+                if (confirm(`Bạn có chắc chắn muốn xóa thành viên "${contacts[index].name}" khỏi danh bạ?`)) {
+                    contacts.splice(parseInt(index), 1);
+                    localStorage.setItem('contacts', JSON.stringify(contacts));
+                    renderContacts();
+                    closeModal();
+                }
+            }
+        }
+
+        // Tự động chạy tải danh bạ khi mở trang web
+        window.onload = renderContacts;
+    </script>
+</body>
+</html>
