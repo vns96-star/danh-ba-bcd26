@@ -16,7 +16,6 @@
 <body class="bg-slate-950 min-h-screen py-4 px-2 sm:p-6 flex justify-center items-center">
 
     <div class="w-full max-w-5xl bg-white rounded-3xl shadow-2xl overflow-hidden flex flex-col h-[92vh] max-h-[850px]">
-        <!-- HEADER chính -->
         <div class="bg-gradient-to-r from-slate-800 to-indigo-950 p-5 text-white shrink-0">
             <div class="flex justify-between items-center">
                 <div>
@@ -27,7 +26,7 @@
                 </div>
                 <div class="flex gap-2">
                     <button id="manageCatBtn" onclick="openCategoryModal()" class="bg-indigo-600/50 border border-indigo-500 text-white px-3 py-2 rounded-xl flex items-center gap-1.5 text-xs font-bold shadow-md hover:bg-indigo-600 transition-all hidden">
-                        <i class="fa-solid fa-layer-group"></i> Quản lý danh mục
+                        <i class="fa-solid fa-map-location-dot"></i> Quản lý địa bàn
                     </button>
                     <button id="mainAddBtn" onclick="openModal('add')" class="bg-amber-500 text-slate-950 px-3 py-2 rounded-xl flex items-center gap-1.5 text-xs sm:text-sm font-bold shadow-md hover:bg-amber-400 transition-all hidden">
                         <i class="fa-solid fa-plus"></i> Thêm thành viên
@@ -39,11 +38,10 @@
                 <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 text-slate-400">
                     <i class="fa-solid fa-magnifying-glass text-sm"></i>
                 </span>
-                <input type="text" id="searchInput" onkeyup="filterContacts()" placeholder="Tìm nhanh không dấu theo tên, SĐT, chức vụ, địa bàn..." class="w-full pl-10 pr-4 py-2.5 bg-white text-slate-800 rounded-xl focus:outline-none text-sm shadow-inner">
+                <input type="text" id="searchInput" onkeyup="filterContacts()" placeholder="Tìm nhanh theo tên, SĐT, chức vụ, địa bàn..." class="w-full pl-10 pr-4 py-2.5 bg-white text-slate-800 rounded-xl focus:outline-none text-sm shadow-inner">
             </div>
         </div>
 
-        <!-- THANH TRẠNG THÁI -->
         <div class="bg-slate-50 px-5 py-2.5 border-b border-slate-100 flex justify-between items-center text-xs text-slate-500 shrink-0">
             <span id="counter" class="font-bold">Đang tải dữ liệu...</span>
             <div id="adminStatusArea">
@@ -53,7 +51,6 @@
             </div>
         </div>
 
-        <!-- TIÊU ĐỀ BẢNG -->
         <div class="hidden md:grid grid-cols-12 gap-2 px-6 py-2 bg-slate-100 text-slate-500 text-xs font-bold uppercase tracking-wider shrink-0 border-b border-slate-200">
             <div class="col-span-3">Họ và Tên</div>
             <div class="col-span-2">Chức danh</div>
@@ -63,13 +60,11 @@
             <div class="col-span-1 text-center">Thao tác</div>
         </div>
 
-        <!-- DANH SÁCH LIÊN HỆ -->
         <div id="contactList" class="flex-1 overflow-y-auto p-3 md:p-4 space-y-2 bg-slate-50/50">
             <div class="text-center py-12 text-slate-400 text-sm">Đang đồng bộ cơ sở dữ liệu đám mây...</div>
         </div>
     </div>
 
-    <!-- MODAL ĐĂNG NHẬP ADMIN -->
     <div id="adminAuthModal" class="fixed inset-0 bg-slate-950/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
         <div class="bg-white w-full max-w-sm rounded-3xl shadow-2xl p-6 space-y-4">
             <div class="text-center">
@@ -89,42 +84,30 @@
         </div>
     </div>
 
-    <!-- MODAL QUẢN LÝ DANH MỤC (MỚI) -->
     <div id="categoryModal" class="fixed inset-0 bg-slate-950/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
-        <div class="bg-white w-full max-w-2xl rounded-3xl shadow-2xl p-6 flex flex-col h-[80vh] max-h-[600px]">
+        <div class="bg-white w-full max-w-xl rounded-3xl shadow-2xl p-6 flex flex-col h-[75vh] max-h-[550px]">
             <div class="flex justify-between items-center pb-3 border-b border-slate-100 shrink-0">
                 <h3 class="text-lg font-bold text-slate-800 flex items-center gap-2">
-                    <i class="fa-solid fa-folder-tree text-indigo-600"></i> Quản lý Cấu trúc Danh mục
+                    <i class="fa-solid fa-map-location-dot text-indigo-600"></i> Quản lý Danh mục Địa bàn
                 </h3>
                 <button onclick="closeCategoryModal()" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-lg"></i></button>
             </div>
 
-            <!-- Chọn loại danh mục -->
-            <div class="grid grid-cols-3 gap-2 my-4 shrink-0">
-                <button onclick="switchCategoryTab('positions')" id="tab-positions" class="py-2 text-xs font-bold rounded-xl border transition-all bg-indigo-600 text-white border-indigo-600">Chức vụ</button>
-                <button onclick="switchCategoryTab('titles')" id="tab-titles" class="py-2 text-xs font-bold rounded-xl border transition-all bg-white text-slate-600 border-slate-200 hover:bg-slate-50">Chức danh</button>
-                <button onclick="switchCategoryTab('regions')" id="tab-regions" class="py-2 text-xs font-bold rounded-xl border transition-all bg-white text-slate-600 border-slate-200 hover:bg-slate-50">Địa bàn</button>
-            </div>
-
-            <!-- Form Thêm phần tử mới -->
-            <div class="bg-slate-50 p-3 rounded-2xl border border-slate-100 space-y-2 shrink-0 mb-3">
-                <p class="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Thêm danh mục mới</p>
+            <div class="bg-slate-50 p-3 rounded-2xl border border-slate-100 space-y-2 shrink-0 my-4">
+                <p class="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Thêm địa bàn mới</p>
                 <div class="flex gap-2">
-                    <input type="text" id="newCatName" placeholder="Nhập tên mới..." class="flex-1 px-3 py-2 border rounded-xl text-xs focus:ring-2 focus:ring-indigo-500 outline-none">
+                    <input type="text" id="newCatName" placeholder="Ví dụ: Quận 1, Tổ công tác số 2..." class="flex-1 px-3 py-2 border rounded-xl text-xs focus:ring-2 focus:ring-indigo-500 outline-none">
                     <button onclick="handleCreateCategory()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-xl text-xs font-bold shadow-sm shrink-0 flex items-center gap-1">
                         <i class="fa-solid fa-plus"></i> Thêm
                     </button>
                 </div>
             </div>
 
-            <!-- Danh sách phần tử hiển thị để Sửa/Xóa -->
             <div id="categoryItemsContainer" class="flex-1 overflow-y-auto space-y-1.5 dropdown-scroll pr-1">
-                <!-- Sẽ render bằng JS -->
-            </div>
+                </div>
         </div>
     </div>
 
-    <!-- MODAL FORM (THÊM / SỬA NHÂN SỰ) -->
     <div id="contactModal" class="fixed inset-0 bg-slate-950/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
         <div class="bg-white w-full max-w-md rounded-3xl shadow-2xl p-6 space-y-4 max-h-[95vh] overflow-y-auto" onclick="closeAllDropdowns(event)">
             <h3 id="modalTitle" class="text-lg font-bold text-slate-800">Thêm Thành Viên</h3>
@@ -132,51 +115,30 @@
                 <input type="hidden" id="editId">
                 <div>
                     <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Họ và Tên <span class="text-red-500">*</span></label>
-                    <input type="text" id="formName" required placeholder="Ví dụ: Nguyễn Văn A" class="w-full px-4 py-2 border rounded-xl text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+                    <input type="text" id="formName" required placeholder="Ví dụ: Nguyễn Văn A" class="w-full px-4 py-2 border rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 outline-none">
                 </div>
                 <div>
                     <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Số điện thoại <span class="text-red-500">*</span></label>
-                    <input type="tel" id="formPhone" required placeholder="Ví dụ: 0901234567" class="w-full px-4 py-2 border rounded-xl text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+                    <input type="tel" id="formPhone" required placeholder="Ví dụ: 0901234567" class="w-full px-4 py-2 border rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 outline-none">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Chức danh</label>
+                    <input type="text" id="formTitle" placeholder="Ví dụ: Tổ trưởng, Chuyên viên..." class="w-full px-4 py-2 border rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 outline-none">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Chức vụ</label>
+                    <input type="text" id="formPosition" placeholder="Ví dụ: Phó Trưởng phòng, Thượng úy..." class="w-full px-4 py-2 border rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 outline-none">
                 </div>
 
-                <!-- Dropdown Chức vụ -->
-                <div class="relative dropdown-container" id="containerPosition">
-                    <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Chức vụ <span class="text-red-500">*</span></label>
-                    <div onclick="toggleDropdown('formPosition')" id="selectBoxformPosition" class="w-full px-4 py-2 border rounded-xl text-sm flex justify-between items-center cursor-pointer bg-white text-slate-400">
-                        <span>-- Chọn chức vụ --</span>
-                        <i class="fa-solid fa-chevron-down text-slate-400 text-xs"></i>
-                    </div>
-                    <input type="hidden" id="formPosition" required>
-                    <div id="dropdownformPosition" class="absolute left-0 right-0 mt-1 bg-white border rounded-xl shadow-xl z-50 p-2 space-y-2 hidden">
-                        <input type="text" onkeyup="filterDropdown('formPosition')" placeholder="Tìm kiếm chức vụ nhanh..." class="w-full px-3 py-1.5 border rounded-lg text-xs outline-none focus:ring-2 focus:ring-blue-500">
-                        <div class="max-h-40 overflow-y-auto dropdown-scroll text-sm text-slate-700" id="optionsformPosition"></div>
-                    </div>
-                </div>
-
-                <!-- Dropdown Chức danh -->
-                <div class="relative dropdown-container" id="containerTitle">
-                    <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Chức danh <span class="text-red-500">*</span></label>
-                    <div onclick="toggleDropdown('formTitle')" id="selectBoxformTitle" class="w-full px-4 py-2 border rounded-xl text-sm flex justify-between items-center cursor-pointer bg-white text-slate-400">
-                        <span>-- Chọn chức danh --</span>
-                        <i class="fa-solid fa-chevron-down text-slate-400 text-xs"></i>
-                    </div>
-                    <input type="hidden" id="formTitle" required>
-                    <div id="dropdownformTitle" class="absolute left-0 right-0 mt-1 bg-white border rounded-xl shadow-xl z-50 p-2 space-y-2 hidden">
-                        <input type="text" onkeyup="filterDropdown('formTitle')" placeholder="Tìm kiếm chức danh nhanh..." class="w-full px-3 py-1.5 border rounded-lg text-xs outline-none focus:ring-2 focus:ring-blue-500">
-                        <div class="max-h-40 overflow-y-auto dropdown-scroll text-sm text-slate-700" id="optionsformTitle"></div>
-                    </div>
-                </div>
-
-                <!-- Dropdown Địa bàn -->
                 <div class="relative dropdown-container" id="containerRegion">
-                    <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Địa bàn</label>
+                    <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Địa bàn liên kết</label>
                     <div onclick="toggleDropdown('formRegion')" id="selectBoxformRegion" class="w-full px-4 py-2 border rounded-xl text-sm flex justify-between items-center cursor-pointer bg-white text-slate-400">
                         <span>-- Để trống / Toàn quốc --</span>
                         <i class="fa-solid fa-chevron-down text-slate-400 text-xs"></i>
                     </div>
                     <input type="hidden" id="formRegion">
                     <div id="dropdownformRegion" class="absolute left-0 right-0 mt-1 bg-white border rounded-xl shadow-xl z-50 p-2 space-y-2 hidden">
-                        <input type="text" onkeyup="filterDropdown('formRegion')" placeholder="Tìm kiếm địa bàn..." class="w-full px-3 py-1.5 border rounded-lg text-xs outline-none focus:ring-2 focus:ring-blue-500">
+                        <input type="text" onkeyup="filterDropdown('formRegion')" placeholder="Tìm kiếm địa bàn..." class="w-full px-3 py-1.5 border rounded-lg text-xs outline-none focus:ring-2 focus:ring-indigo-500">
                         <div class="max-h-40 overflow-y-auto dropdown-scroll text-sm text-slate-700" id="optionsformRegion"></div>
                     </div>
                 </div>
@@ -198,9 +160,8 @@
         const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
         
         let contactsData = [];
-        let categories = { positions: [], titles: [], regions: [] };
+        let regionsList = [];
         let currentAdminKey = null;
-        let currentActiveTab = 'positions'; // Tab danh mục hiện tại đang chọn quản lý
 
         function removeVietnameseTones(str) {
             if (!str) return "";
@@ -221,7 +182,7 @@
             return str.toLowerCase().trim();
         }
 
-        // --- HẬU ĐÀI ĐĂNG NHẬP ADMIN ---
+        // --- ĐĂNG NHẬP / XÁC THỰC QUẢN TRỊ ---
         function openAdminLoginModal() {
             if(currentAdminKey) {
                 if(confirm("Bạn muốn Đăng xuất thoát quyền Quản trị không?")) {
@@ -250,7 +211,6 @@
                 const clientWithAuth = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
                     global: { headers: { 'x-admin-key': val } }
                 });
-                // Test thử quyền ghi lên bảng bất kỳ để xác thực pass policy
                 const { error: testError } = await clientWithAuth.from('contacts').update({ name: 'TEST_AUTH' }).eq('id', 0);
 
                 if (testError && (testError.status === 401 || testError.status === 403 || testError.code === "P0001")) {
@@ -293,37 +253,23 @@
             }
         }
 
-        // --- QUẢN LÝ RIÊNG CHO DANH MỤC (MỚI) ---
+        // --- QUẢN LÝ DANH MỤC ĐỊA BÀN ---
         function openCategoryModal() {
             document.getElementById('categoryModal').classList.remove('hidden');
-            switchCategoryTab(currentActiveTab);
-        }
-        function closeCategoryModal() { document.getElementById('categoryModal').classList.add('hidden'); }
-
-        function switchCategoryTab(tab) {
-            currentActiveTab = tab;
-            ['positions', 'titles', 'regions'].forEach(t => {
-                const btn = document.getElementById('tab-' + t);
-                if(t === tab) {
-                    btn.className = "py-2 text-xs font-bold rounded-xl border transition-all bg-indigo-600 text-white border-indigo-600";
-                } else {
-                    btn.className = "py-2 text-xs font-bold rounded-xl border transition-all bg-white text-slate-600 border-slate-200 hover:bg-slate-50";
-                }
-            });
             renderCategoryItems();
         }
+        function closeCategoryModal() { document.getElementById('categoryModal').classList.add('hidden'); }
 
         function renderCategoryItems() {
             const container = document.getElementById('categoryItemsContainer');
             container.innerHTML = '';
-            const list = categories[currentActiveTab] || [];
 
-            if(list.length === 0) {
-                container.innerHTML = `<div class="text-center py-6 text-xs text-slate-400">Danh mục này hiện tại đang trống.</div>`;
+            if(regionsList.length === 0) {
+                container.innerHTML = `<div class="text-center py-6 text-xs text-slate-400">Danh mục địa bàn trống.</div>`;
                 return;
             }
 
-            list.forEach(item => {
+            regionsList.forEach(item => {
                 const row = document.createElement('div');
                 row.className = "flex items-center justify-between p-2 bg-slate-50 hover:bg-slate-100 rounded-xl border border-slate-100 transition-all gap-2";
                 row.innerHTML = `
@@ -337,7 +283,6 @@
             });
         }
 
-        // Tạo Client mang Header cấu hình động để test pass policy cho từng tính năng độc lập
         function getAuthClient(customPass = null) {
             const activeKey = customPass || currentAdminKey;
             return supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
@@ -347,78 +292,76 @@
 
         async function handleCreateCategory() {
             const name = document.getElementById('newCatName').value.trim();
-            if(!name) return alert("Vui lòng điền tên danh mục!");
+            if(!name) return alert("Vui lòng điền tên địa bàn!");
             
             let userPass = null;
             if(!currentAdminKey) {
-                userPass = prompt("Nhập mã bảo mật (Pass Policy) được cấp để THÊM danh mục này:");
+                userPass = prompt("Nhập mã bảo mật (Pass Policy) để thực hiện THÊM địa bàn:");
                 if(!userPass) return;
             }
 
             const client = getAuthClient(userPass);
-            const { error } = await client.from(currentActiveTab).insert([{ name }]);
+            const { error } = await client.from('regions').insert([{ name }]);
             
             if(error) {
-                alert("Thao tác thất bại! Bạn không có quyền THÊM cho danh mục này.");
+                alert("Thao tác thất bại! Bạn không có quyền THÊM địa bàn.");
             } else {
                 document.getElementById('newCatName').value = '';
-                await loadCategories();
+                await loadRegions();
                 renderCategoryItems();
             }
         }
 
         async function handleUpdateCategory(id) {
             const newName = document.getElementById(`catInput-${id}`).value.trim();
-            if(!newName) return alert("Tên danh mục không được để trống!");
+            if(!newName) return alert("Tên địa bàn không được trống!");
 
             let userPass = null;
             if(!currentAdminKey) {
-                userPass = prompt("Nhập mã bảo mật (Pass Policy) được cấp để SỬA danh mục này:");
+                userPass = prompt("Nhập mã bảo mật (Pass Policy) để thực hiện SỬA địa bàn:");
                 if(!userPass) return;
             }
 
             const client = getAuthClient(userPass);
-            const { error } = await client.from(currentActiveTab).update({ name: newName }).eq('id', id);
+            const { error } = await client.from('regions').update({ name: newName }).eq('id', id);
 
             if(error) {
-                alert("Thao tác thất bại! Bạn không có quyền SỬA danh mục này.");
-                await loadCategories();
+                alert("Thao tác thất bại! Sai mã chính sách hoặc lỗi hệ thống.");
+                await loadRegions();
                 renderCategoryItems();
             } else {
-                alert("Cập nhật danh mục thành công!");
-                await loadCategories();
-                loadContacts(); // Tải lại danh bạ bên ngoài để đồng bộ tên mới thay đổi
+                alert("Cập nhật địa bàn thành công!");
+                await loadRegions();
+                loadContacts();
             }
         }
 
         async function handleDeleteCategory(id) {
-            if(!confirm("Xóa danh mục có thể ảnh hưởng đến dữ liệu nhân sự đang liên kết. Xác nhận xóa?")) return;
+            if(!confirm("Xóa địa bàn có thể ảnh hưởng đến liên kết dữ liệu nhân sự. Xác nhận xóa?")) return;
 
             let userPass = null;
             if(!currentAdminKey) {
-                userPass = prompt("Nhập mã bảo mật (Pass Policy) được cấp để XÓA danh mục này:");
+                userPass = prompt("Nhập mã bảo mật (Pass Policy) để thực hiện XÓA địa bàn:");
                 if(!userPass) return;
             }
 
             const client = getAuthClient(userPass);
-            const { error } = await client.from(currentActiveTab).delete().eq('id', id);
+            const { error } = await client.from('regions').delete().eq('id', id);
 
             if(error) {
-                alert("Thao tác thất bại! Danh mục đang chứa dữ liệu nhân sự hoặc sai mã chính sách (Pass Policy).");
+                alert("Thao tác thất bại! Địa bàn đang chứa nhân sự hoặc sai mã bảo mật.");
             } else {
-                await loadCategories();
+                await loadRegions();
                 renderCategoryItems();
                 loadContacts();
             }
         }
 
-        // --- ĐIỀU KHIỂN SEARCHABLE DROPDOWN LIÊN HỆ ---
+        // --- DROPDOWN ĐỊA BÀN ---
         function toggleDropdown(fieldId) {
             event.stopPropagation();
             const dropdown = document.getElementById('dropdown' + fieldId);
             const isHidden = dropdown.classList.contains('hidden');
-            document.querySelectorAll("[id^='dropdownform']").forEach(el => el.classList.add('hidden'));
-            
             if (isHidden) {
                 dropdown.classList.remove('hidden');
                 const inp = dropdown.querySelector('input');
@@ -430,7 +373,7 @@
 
         function closeAllDropdowns(event) {
             if (!event.target.closest('.dropdown-container')) {
-                document.querySelectorAll("[id^='dropdownform']").forEach(el => el.classList.add('hidden'));
+                document.getElementById('dropdownformRegion').classList.add('hidden');
             }
         }
 
@@ -451,7 +394,7 @@
             
             if(id === null || id === "") {
                 hiddenInput.value = "";
-                selectBox.querySelector('span').innerText = fieldId === 'formRegion' ? "-- Để trống / Toàn quốc --" : "-- Chọn danh mục --";
+                selectBox.querySelector('span').innerText = "-- Để trống / Toàn quốc --";
                 selectBox.classList.add('text-slate-400');
             } else {
                 hiddenInput.value = id;
@@ -462,39 +405,25 @@
         }
 
         // --- ĐỒNG BỘ DỮ LIỆU ---
-        async function loadCategories() {
-            const [posRes, titleRes, regRes] = await Promise.all([
-                _supabase.from('positions').select('id, name').order('name'),
-                _supabase.from('titles').select('id, name').order('name'),
-                _supabase.from('regions').select('id, name').order('name')
-            ]);
+        async function loadRegions() {
+            const { data } = await _supabase.from('regions').select('id, name').order('name');
+            regionsList = data || [];
 
-            categories.positions = posRes.data || [];
-            categories.titles = titleRes.data || [];
-            categories.regions = regRes.data || [];
-
-            buildDropdownOptions('formPosition', categories.positions, false);
-            buildDropdownOptions('formTitle', categories.titles, false);
-            buildDropdownOptions('formRegion', categories.regions, true);
-        }
-
-        function buildDropdownOptions(fieldId, dataList, hasEmptyOption) {
-            const optionsContainer = document.getElementById('options' + fieldId);
+            const optionsContainer = document.getElementById('optionsformRegion');
             optionsContainer.innerHTML = '';
 
-            if(hasEmptyOption) {
-                const emptyDiv = document.createElement('div');
-                emptyDiv.className = "option-item px-3 py-2 hover:bg-slate-100 cursor-pointer text-slate-400 italic text-xs border-b border-slate-50";
-                emptyDiv.innerText = "-- Để trống / Toàn quốc --";
-                emptyDiv.onclick = () => selectOption(fieldId, "", "");
-                optionsContainer.appendChild(emptyDiv);
-            }
+            // Lựa chọn rỗng
+            const emptyDiv = document.createElement('div');
+            emptyDiv.className = "option-item px-3 py-2 hover:bg-slate-100 cursor-pointer text-slate-400 italic text-xs border-b border-slate-50";
+            emptyDiv.innerText = "-- Để trống / Toàn quốc --";
+            emptyDiv.onclick = () => selectOption('formRegion', "", "");
+            optionsContainer.appendChild(emptyDiv);
 
-            dataList.forEach(item => {
+            regionsList.forEach(item => {
                 const div = document.createElement('div');
                 div.className = "option-item px-3 py-2 hover:bg-indigo-50 hover:text-indigo-600 cursor-pointer border-b border-slate-50 text-xs transition-all";
                 div.innerText = item.name;
-                div.onclick = () => selectOption(fieldId, item.id, item.name);
+                div.onclick = () => selectOption('formRegion', item.id, item.name);
                 optionsContainer.appendChild(div);
             });
         }
@@ -502,11 +431,11 @@
         async function loadContacts() {
             const { data, error } = await _supabase
                 .from('contacts')
-                .select(`id, name, phone, position_id, title_id, region_id, positions(name), titles(name), regions(name)`)
+                .select(`id, name, phone, position, title, region_id, regions(name)`)
                 .order('name', { ascending: true });
 
             if (error) {
-                document.getElementById('contactList').innerHTML = `<div class="text-center text-red-500 py-6">Lỗi dữ liệu.</div>`;
+                document.getElementById('contactList').innerHTML = `<div class="text-center text-red-500 py-6">Lỗi cơ sở dữ liệu.</div>`;
                 return;
             }
             contactsData = data || [];
@@ -519,13 +448,13 @@
             document.getElementById('counter').innerText = `Tổng số: ${data.length} liên hệ`;
 
             if(data.length === 0) {
-                container.innerHTML = `<div class="text-center py-12 text-slate-400 text-sm">Không tìm thấy kết quả.</div>`;
+                container.innerHTML = `<div class="text-center py-12 text-slate-400 text-sm">Không có dữ liệu phù hợp.</div>`;
                 return;
             }
 
             data.forEach(item => {
-                const posName = item.positions ? item.positions.name : 'Chưa rõ';
-                const titleName = item.titles ? item.titles.name : 'Chưa rõ';
+                const posName = item.position || '—';
+                const titleName = item.title || '—';
                 const regName = item.regions ? item.regions.name : '—';
 
                 const row = document.createElement('div');
@@ -550,14 +479,14 @@
             const filtered = contactsData.filter(c => {
                 return removeVietnameseTones(c.name).includes(query) || 
                        c.phone.includes(query) || 
-                       (c.positions && removeVietnameseTones(c.positions.name).includes(query)) ||
-                       (c.titles && removeVietnameseTones(c.titles.name).includes(query)) ||
+                       (c.position && removeVietnameseTones(c.position).includes(query)) ||
+                       (c.title && removeVietnameseTones(c.title).includes(query)) ||
                        (c.regions && removeVietnameseTones(c.regions.name).includes(query));
             });
             renderContacts(filtered);
         }
 
-        // --- ĐIỀU KHIỂN FORM LIÊN HỆ ---
+        // --- HÀM XỬ LÝ FORM LIÊN HỆ ---
         function openModal(mode, id = null) {
             document.getElementById('contactForm').reset();
             document.getElementById('contactModal').classList.remove('hidden');
@@ -565,7 +494,7 @@
                 document.getElementById('modalTitle').innerText = "Thêm Thành Viên Mới";
                 document.getElementById('editId').value = "";
                 document.getElementById('deleteBtn').classList.add('hidden');
-                selectOption('formPosition', "", ""); selectOption('formTitle', "", ""); selectOption('formRegion', "", "");
+                selectOption('formRegion', "", "");
             } else {
                 document.getElementById('modalTitle').innerText = "Cập Nhật Thông Tin";
                 document.getElementById('editId').value = id;
@@ -574,9 +503,9 @@
                 if(item) {
                     document.getElementById('formName').value = item.name;
                     document.getElementById('formPhone').value = item.phone;
-                    if(item.position_id) selectOption('formPosition', item.position_id, item.positions.name);
-                    if(item.title_id) selectOption('formTitle', item.title_id, item.titles.name);
-                    if(item.region_id) selectOption('formRegion', item.region_id, item.regions.name);
+                    document.getElementById('formTitle').value = item.title || '';
+                    document.getElementById('formPosition').value = item.position || '';
+                    if(item.region_id && item.regions) selectOption('formRegion', item.region_id, item.regions.name);
                     else selectOption('formRegion', "", "");
                 }
             }
@@ -589,15 +518,15 @@
             const payload = {
                 name: document.getElementById('formName').value.trim(),
                 phone: document.getElementById('formPhone').value.trim(),
-                position_id: parseInt(document.getElementById('formPosition').value),
-                title_id: parseInt(document.getElementById('formTitle').value),
+                title: document.getElementById('formTitle').value.trim() || null,
+                position: document.getElementById('formPosition').value.trim() || null,
                 region_id: document.getElementById('formRegion').value ? parseInt(document.getElementById('formRegion').value) : null
             };
 
             const client = getAuthClient();
             let res = id === "" ? await client.from('contacts').insert([payload]) : await client.from('contacts').update(payload).eq('id', id);
 
-            if(res.error) alert("Bạn không có quyền thực hiện thao tác này!");
+            if(res.error) alert("Thao tác lỗi! Hãy kiểm tra lại phân quyền bảo mật.");
             else { closeModal(); loadContacts(); }
         }
 
@@ -605,14 +534,14 @@
             const id = document.getElementById('editId').value;
             if(id && confirm("Xóa vĩnh viễn liên hệ này?")) {
                 const { error } = await getAuthClient().from('contacts').delete().eq('id', id);
-                if(error) alert("Không thể xóa!");
+                if(error) alert("Lỗi phân quyền, không thể xóa!");
                 else { closeModal(); loadContacts(); }
             }
         }
 
         window.onload = async () => {
             updateAdminUI();
-            await loadCategories();
+            await loadRegions();
             await loadContacts();
             document.getElementById('adminPasswordInput').addEventListener('keypress', function(e) {
                 if (e.key === 'Enter') submitAdminLogin();
