@@ -16,6 +16,7 @@
 <body class="bg-slate-950 min-h-screen py-4 px-2 sm:p-6 flex justify-center items-center">
 
     <div class="w-full max-w-5xl bg-white rounded-3xl shadow-2xl overflow-hidden flex flex-col h-[92vh] max-h-[850px]">
+        <!-- HEADER chính -->
         <div class="bg-gradient-to-r from-slate-800 to-indigo-950 p-5 text-white shrink-0">
             <div class="flex justify-between items-center">
                 <div>
@@ -24,9 +25,14 @@
                     </h1>
                     <p class="text-slate-300 text-xs mt-0.5">Danh bạ phục vụ các Tổ Công tác BCĐ26</p>
                 </div>
-                <button id="mainAddBtn" onclick="openModal('add')" class="bg-amber-500 text-slate-950 px-3 py-2 rounded-xl flex items-center gap-1.5 text-xs sm:text-sm font-bold shadow-md hover:bg-amber-400 transition-all hidden">
-                    <i class="fa-solid fa-plus"></i> Thêm thành viên
-                </button>
+                <div class="flex gap-2">
+                    <button id="manageCatBtn" onclick="openCategoryModal()" class="bg-indigo-600/50 border border-indigo-500 text-white px-3 py-2 rounded-xl flex items-center gap-1.5 text-xs font-bold shadow-md hover:bg-indigo-600 transition-all hidden">
+                        <i class="fa-solid fa-layer-group"></i> Quản lý danh mục
+                    </button>
+                    <button id="mainAddBtn" onclick="openModal('add')" class="bg-amber-500 text-slate-950 px-3 py-2 rounded-xl flex items-center gap-1.5 text-xs sm:text-sm font-bold shadow-md hover:bg-amber-400 transition-all hidden">
+                        <i class="fa-solid fa-plus"></i> Thêm thành viên
+                    </button>
+                </div>
             </div>
             
             <div class="relative mt-4">
@@ -37,9 +43,9 @@
             </div>
         </div>
 
+        <!-- THANH TRẠNG THÁI -->
         <div class="bg-slate-50 px-5 py-2.5 border-b border-slate-100 flex justify-between items-center text-xs text-slate-500 shrink-0">
             <span id="counter" class="font-bold">Đang tải dữ liệu...</span>
-            
             <div id="adminStatusArea">
                 <button onclick="openAdminLoginModal()" class="text-indigo-600 hover:text-indigo-800 font-bold flex items-center gap-1 transition-all">
                     <i class="fa-solid fa-lock-open"></i> Mục quản trị
@@ -47,6 +53,7 @@
             </div>
         </div>
 
+        <!-- TIÊU ĐỀ BẢNG -->
         <div class="hidden md:grid grid-cols-12 gap-2 px-6 py-2 bg-slate-100 text-slate-500 text-xs font-bold uppercase tracking-wider shrink-0 border-b border-slate-200">
             <div class="col-span-3">Họ và Tên</div>
             <div class="col-span-2">Chức danh</div>
@@ -56,11 +63,13 @@
             <div class="col-span-1 text-center">Thao tác</div>
         </div>
 
+        <!-- DANH SÁCH LIÊN HỆ -->
         <div id="contactList" class="flex-1 overflow-y-auto p-3 md:p-4 space-y-2 bg-slate-50/50">
             <div class="text-center py-12 text-slate-400 text-sm">Đang đồng bộ cơ sở dữ liệu đám mây...</div>
         </div>
     </div>
 
+    <!-- MODAL ĐĂNG NHẬP ADMIN -->
     <div id="adminAuthModal" class="fixed inset-0 bg-slate-950/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
         <div class="bg-white w-full max-w-sm rounded-3xl shadow-2xl p-6 space-y-4">
             <div class="text-center">
@@ -75,29 +84,62 @@
             </div>
             <div class="flex gap-2 pt-1">
                 <button type="button" onclick="closeAdminLoginModal()" class="w-1/2 bg-slate-100 text-slate-600 py-2 rounded-xl text-xs font-semibold">Hủy bỏ</button>
-                <button type="button" id="adminSubmitBtn" onclick="submitAdminLogin()" class="w-1/2 bg-indigo-600 hover:bg-indigo-700 text-white py-2 rounded-xl text-xs font-bold shadow-md transition-all flex items-center justify-center gap-1">
-                    Xác nhận
-                </button>
+                <button type="button" id="adminSubmitBtn" onclick="submitAdminLogin()" class="w-1/2 bg-indigo-600 hover:bg-indigo-700 text-white py-2 rounded-xl text-xs font-bold shadow-md transition-all flex items-center justify-center gap-1">Xác nhận</button>
             </div>
         </div>
     </div>
 
+    <!-- MODAL QUẢN LÝ DANH MỤC (MỚI) -->
+    <div id="categoryModal" class="fixed inset-0 bg-slate-950/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white w-full max-w-2xl rounded-3xl shadow-2xl p-6 flex flex-col h-[80vh] max-h-[600px]">
+            <div class="flex justify-between items-center pb-3 border-b border-slate-100 shrink-0">
+                <h3 class="text-lg font-bold text-slate-800 flex items-center gap-2">
+                    <i class="fa-solid fa-folder-tree text-indigo-600"></i> Quản lý Cấu trúc Danh mục
+                </h3>
+                <button onclick="closeCategoryModal()" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+
+            <!-- Chọn loại danh mục -->
+            <div class="grid grid-cols-3 gap-2 my-4 shrink-0">
+                <button onclick="switchCategoryTab('positions')" id="tab-positions" class="py-2 text-xs font-bold rounded-xl border transition-all bg-indigo-600 text-white border-indigo-600">Chức vụ</button>
+                <button onclick="switchCategoryTab('titles')" id="tab-titles" class="py-2 text-xs font-bold rounded-xl border transition-all bg-white text-slate-600 border-slate-200 hover:bg-slate-50">Chức danh</button>
+                <button onclick="switchCategoryTab('regions')" id="tab-regions" class="py-2 text-xs font-bold rounded-xl border transition-all bg-white text-slate-600 border-slate-200 hover:bg-slate-50">Địa bàn</button>
+            </div>
+
+            <!-- Form Thêm phần tử mới -->
+            <div class="bg-slate-50 p-3 rounded-2xl border border-slate-100 space-y-2 shrink-0 mb-3">
+                <p class="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Thêm danh mục mới</p>
+                <div class="flex gap-2">
+                    <input type="text" id="newCatName" placeholder="Nhập tên mới..." class="flex-1 px-3 py-2 border rounded-xl text-xs focus:ring-2 focus:ring-indigo-500 outline-none">
+                    <button onclick="handleCreateCategory()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-xl text-xs font-bold shadow-sm shrink-0 flex items-center gap-1">
+                        <i class="fa-solid fa-plus"></i> Thêm
+                    </button>
+                </div>
+            </div>
+
+            <!-- Danh sách phần tử hiển thị để Sửa/Xóa -->
+            <div id="categoryItemsContainer" class="flex-1 overflow-y-auto space-y-1.5 dropdown-scroll pr-1">
+                <!-- Sẽ render bằng JS -->
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL FORM (THÊM / SỬA NHÂN SỰ) -->
     <div id="contactModal" class="fixed inset-0 bg-slate-950/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
         <div class="bg-white w-full max-w-md rounded-3xl shadow-2xl p-6 space-y-4 max-h-[95vh] overflow-y-auto" onclick="closeAllDropdowns(event)">
             <h3 id="modalTitle" class="text-lg font-bold text-slate-800">Thêm Thành Viên</h3>
             <form id="contactForm" onsubmit="handleFormSubmit(event)" class="space-y-3.5">
                 <input type="hidden" id="editId">
-                
                 <div>
                     <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Họ và Tên <span class="text-red-500">*</span></label>
                     <input type="text" id="formName" required placeholder="Ví dụ: Nguyễn Văn A" class="w-full px-4 py-2 border rounded-xl text-sm focus:ring-2 focus:ring-blue-500 outline-none">
                 </div>
-                
                 <div>
                     <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Số điện thoại <span class="text-red-500">*</span></label>
                     <input type="tel" id="formPhone" required placeholder="Ví dụ: 0901234567" class="w-full px-4 py-2 border rounded-xl text-sm focus:ring-2 focus:ring-blue-500 outline-none">
                 </div>
 
+                <!-- Dropdown Chức vụ -->
                 <div class="relative dropdown-container" id="containerPosition">
                     <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Chức vụ <span class="text-red-500">*</span></label>
                     <div onclick="toggleDropdown('formPosition')" id="selectBoxformPosition" class="w-full px-4 py-2 border rounded-xl text-sm flex justify-between items-center cursor-pointer bg-white text-slate-400">
@@ -111,6 +153,7 @@
                     </div>
                 </div>
 
+                <!-- Dropdown Chức danh -->
                 <div class="relative dropdown-container" id="containerTitle">
                     <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Chức danh <span class="text-red-500">*</span></label>
                     <div onclick="toggleDropdown('formTitle')" id="selectBoxformTitle" class="w-full px-4 py-2 border rounded-xl text-sm flex justify-between items-center cursor-pointer bg-white text-slate-400">
@@ -124,6 +167,7 @@
                     </div>
                 </div>
 
+                <!-- Dropdown Địa bàn -->
                 <div class="relative dropdown-container" id="containerRegion">
                     <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Địa bàn</label>
                     <div onclick="toggleDropdown('formRegion')" id="selectBoxformRegion" class="w-full px-4 py-2 border rounded-xl text-sm flex justify-between items-center cursor-pointer bg-white text-slate-400">
@@ -149,15 +193,14 @@
     </div>
 
     <script>
-        // --- 1. THÔNG TIN CẤU HÌNH SUPABASE ---
         const SUPABASE_URL = "https://aizuhegyzndeqktbeaax.supabase.co"; 
         const SUPABASE_ANON_KEY = "sb_publishable_6aIVGp_H_-UBK4xQ_liaGQ_2xZLCyUF";
-
         const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
         
         let contactsData = [];
         let categories = { positions: [], titles: [], regions: [] };
         let currentAdminKey = null;
+        let currentActiveTab = 'positions'; // Tab danh mục hiện tại đang chọn quản lý
 
         function removeVietnameseTones(str) {
             if (!str) return "";
@@ -175,15 +218,13 @@
             str = str.replace(/Ù|Ú|Ụ|Ủ|Ũ|Ư|Ừ|Ứ|Ự|Ử|Ữ/g, "U");
             str = str.replace(/Ỳ|Ý|Ỵ|Ỷ|Ỹ/g, "Y");
             str = str.replace(/Đ/g, "D");
-            str = str.replace(/\u0300|\u0301|\u0309|\u0303|\u0323/g, ""); 
-            str = str.replace(/\u02C6|\u0306|\u031B/g, ""); 
             return str.toLowerCase().trim();
         }
 
-        // --- 2. HỘP ĐĂNG NHẬP ADMIN CUSTOM MODAL ---
+        // --- HẬU ĐÀI ĐĂNG NHẬP ADMIN ---
         function openAdminLoginModal() {
             if(currentAdminKey) {
-                if(confirm("Bạn đang đăng nhập quyền Quản trị. Bạn có muốn Đăng xuất thoát quyền không?")) {
+                if(confirm("Bạn muốn Đăng xuất thoát quyền Quản trị không?")) {
                     currentAdminKey = null;
                     updateAdminUI();
                     renderContacts(contactsData);
@@ -195,55 +236,34 @@
             document.getElementById('adminPasswordInput').focus();
         }
 
-        function closeAdminLoginModal() {
-            document.getElementById('adminAuthModal').classList.add('hidden');
-        }
+        function closeAdminLoginModal() { document.getElementById('adminAuthModal').classList.add('hidden'); }
 
-        // SỬA LỖI NGHIÊM TRỌNG: Gửi thử một lệnh Write/Auth lên Supabase để xác thực pass trước khi cho vào Admin
         async function submitAdminLogin() {
             const val = document.getElementById('adminPasswordInput').value.trim();
-            if(!val) {
-                alert("Vui lòng điền mật mã!");
-                return;
-            }
+            if(!val) return alert("Vui lòng điền mật mã!");
 
             const submitBtn = document.getElementById('adminSubmitBtn');
             submitBtn.disabled = true;
             submitBtn.innerHTML = `<i class="fa-solid fa-spinner animate-spin"></i> Đang thử...`;
 
             try {
-                // Tạo một client tạm thời mang theo key vừa nhập để gửi yêu cầu test
                 const clientWithAuth = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
                     global: { headers: { 'x-admin-key': val } }
                 });
-
-                // Thực hiện một thao tác test (Ví dụ: Thử gọi lệnh giải mã RPC hoặc thực hiện lệnh chèn ảo không thành công)
-                // Ở đây chúng ta mượn API giải quyết chuẩn: Gửi thử một lệnh cập nhật có ID không tưởng hoặc query bảng nhạy cảm được cấu hình mã bảo mật.
-                // Một cách tối ưu là bạn select thử một bản ghi mẫu kèm rls header:
-                const { error } = await clientWithAuth.from('contacts').select('id').limit(1);
-
-                // Dựa trên thiết kế RLS PostgREST của bạn: Nếu x-admin-key sai, API Gateway hoặc Postgres Trigger sẽ từ chối/trả error hoặc bạn có hàm RPC riêng để check pass.
-                // Để chắc chắn nhất, hệ thống sẽ thực hiện thử một lệnh check an toàn:
-                // Nếu hệ thống của bạn sử dụng header này truyền thẳng vào API Gateway bảo mật:
-                
-                // Giả sử logic DB của bạn là nhập sai mật khẩu thì khi gọi insert/update hoặc thậm chí là select (nếu cấu hình ẩn hoàn toàn) sẽ bị chặn.
-                // Để kiểm tra mật mã chính xác nhất với kiến trúc x-admin-key: ta thử gửi một lệnh cập nhật ảo tới ID số 0:
+                // Test thử quyền ghi lên bảng bất kỳ để xác thực pass policy
                 const { error: testError } = await clientWithAuth.from('contacts').update({ name: 'TEST_AUTH' }).eq('id', 0);
 
-                // Nếu có lỗi "Mật mã sai" từ DB (thường dựa trên mã hóa trigger hoặc middleware chặn chuỗi):
-                // LƯU Ý: Nếu DB của bạn trả lỗi khi `x-admin-key` không hợp lệ, ta bắt tình huống đó ở đây:
-                if (testError && (testError.message.includes("violates") || testError.status === 401 || testError.status === 403 || testError.code === "P0001")) {
+                if (testError && (testError.status === 401 || testError.status === 403 || testError.code === "P0001")) {
                     alert("Mật mã quản trị không chính xác!");
                     currentAdminKey = null;
                 } else {
-                    // Đăng nhập thành công
                     currentAdminKey = val;
                     closeAdminLoginModal();
                     updateAdminUI();
                     renderContacts(contactsData);
                 }
             } catch (err) {
-                alert("Mật mã quản trị không đúng hoặc lỗi kết nối!");
+                alert("Lỗi kết nối bảo mật!");
                 currentAdminKey = null;
             } finally {
                 submitBtn.disabled = false;
@@ -254,6 +274,7 @@
         function updateAdminUI() {
             const area = document.getElementById('adminStatusArea');
             const mainAddBtn = document.getElementById('mainAddBtn');
+            const manageCatBtn = document.getElementById('manageCatBtn');
             
             if(currentAdminKey) {
                 area.innerHTML = `
@@ -261,16 +282,137 @@
                         <i class="fa-solid fa-user-shield"></i> Quản trị viên • <button onclick="openAdminLoginModal()" class="underline text-slate-500 font-normal hover:text-red-500 ml-1">Thoát</button>
                     </span>`;
                 mainAddBtn.classList.remove('hidden');
+                manageCatBtn.classList.remove('hidden');
             } else {
                 area.innerHTML = `
                     <button onclick="openAdminLoginModal()" class="text-indigo-600 hover:text-indigo-800 font-bold flex items-center gap-1 transition-all">
                         <i class="fa-solid fa-lock-open"></i> Mục quản trị
                     </button>`;
                 mainAddBtn.classList.add('hidden');
+                manageCatBtn.classList.add('hidden');
             }
         }
 
-        // --- 3. ĐIỀU KHIỂN SEARCHABLE DROPDOWN ---
+        // --- QUẢN LÝ RIÊNG CHO DANH MỤC (MỚI) ---
+        function openCategoryModal() {
+            document.getElementById('categoryModal').classList.remove('hidden');
+            switchCategoryTab(currentActiveTab);
+        }
+        function closeCategoryModal() { document.getElementById('categoryModal').classList.add('hidden'); }
+
+        function switchCategoryTab(tab) {
+            currentActiveTab = tab;
+            ['positions', 'titles', 'regions'].forEach(t => {
+                const btn = document.getElementById('tab-' + t);
+                if(t === tab) {
+                    btn.className = "py-2 text-xs font-bold rounded-xl border transition-all bg-indigo-600 text-white border-indigo-600";
+                } else {
+                    btn.className = "py-2 text-xs font-bold rounded-xl border transition-all bg-white text-slate-600 border-slate-200 hover:bg-slate-50";
+                }
+            });
+            renderCategoryItems();
+        }
+
+        function renderCategoryItems() {
+            const container = document.getElementById('categoryItemsContainer');
+            container.innerHTML = '';
+            const list = categories[currentActiveTab] || [];
+
+            if(list.length === 0) {
+                container.innerHTML = `<div class="text-center py-6 text-xs text-slate-400">Danh mục này hiện tại đang trống.</div>`;
+                return;
+            }
+
+            list.forEach(item => {
+                const row = document.createElement('div');
+                row.className = "flex items-center justify-between p-2 bg-slate-50 hover:bg-slate-100 rounded-xl border border-slate-100 transition-all gap-2";
+                row.innerHTML = `
+                    <input type="text" id="catInput-${item.id}" value="${item.name}" class="bg-transparent font-medium text-slate-700 text-xs flex-1 px-2 py-1 outline-none border border-transparent focus:border-indigo-300 focus:bg-white rounded-lg">
+                    <div class="flex items-center gap-1">
+                        <button onclick="handleUpdateCategory(${item.id})" class="p-1 px-2 bg-indigo-50 text-indigo-600 hover:bg-indigo-100 rounded-lg text-[11px] font-bold transition-all"><i class="fa-solid fa-floppy-disk"></i> Lưu</button>
+                        <button onclick="handleDeleteCategory(${item.id})" class="p-1 px-2 bg-rose-50 text-rose-600 hover:bg-rose-100 rounded-lg text-[11px] font-bold transition-all"><i class="fa-solid fa-trash-can"></i> Xóa</button>
+                    </div>
+                `;
+                container.appendChild(row);
+            });
+        }
+
+        // Tạo Client mang Header cấu hình động để test pass policy cho từng tính năng độc lập
+        function getAuthClient(customPass = null) {
+            const activeKey = customPass || currentAdminKey;
+            return supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+                global: { headers: { 'x-admin-key': activeKey } }
+            });
+        }
+
+        async function handleCreateCategory() {
+            const name = document.getElementById('newCatName').value.trim();
+            if(!name) return alert("Vui lòng điền tên danh mục!");
+            
+            let userPass = null;
+            if(!currentAdminKey) {
+                userPass = prompt("Nhập mã bảo mật (Pass Policy) được cấp để THÊM danh mục này:");
+                if(!userPass) return;
+            }
+
+            const client = getAuthClient(userPass);
+            const { error } = await client.from(currentActiveTab).insert([{ name }]);
+            
+            if(error) {
+                alert("Thao tác thất bại! Bạn không có quyền THÊM cho danh mục này.");
+            } else {
+                document.getElementById('newCatName').value = '';
+                await loadCategories();
+                renderCategoryItems();
+            }
+        }
+
+        async function handleUpdateCategory(id) {
+            const newName = document.getElementById(`catInput-${id}`).value.trim();
+            if(!newName) return alert("Tên danh mục không được để trống!");
+
+            let userPass = null;
+            if(!currentAdminKey) {
+                userPass = prompt("Nhập mã bảo mật (Pass Policy) được cấp để SỬA danh mục này:");
+                if(!userPass) return;
+            }
+
+            const client = getAuthClient(userPass);
+            const { error } = await client.from(currentActiveTab).update({ name: newName }).eq('id', id);
+
+            if(error) {
+                alert("Thao tác thất bại! Bạn không có quyền SỬA danh mục này.");
+                await loadCategories();
+                renderCategoryItems();
+            } else {
+                alert("Cập nhật danh mục thành công!");
+                await loadCategories();
+                loadContacts(); // Tải lại danh bạ bên ngoài để đồng bộ tên mới thay đổi
+            }
+        }
+
+        async function handleDeleteCategory(id) {
+            if(!confirm("Xóa danh mục có thể ảnh hưởng đến dữ liệu nhân sự đang liên kết. Xác nhận xóa?")) return;
+
+            let userPass = null;
+            if(!currentAdminKey) {
+                userPass = prompt("Nhập mã bảo mật (Pass Policy) được cấp để XÓA danh mục này:");
+                if(!userPass) return;
+            }
+
+            const client = getAuthClient(userPass);
+            const { error } = await client.from(currentActiveTab).delete().eq('id', id);
+
+            if(error) {
+                alert("Thao tác thất bại! Danh mục đang chứa dữ liệu nhân sự hoặc sai mã chính sách (Pass Policy).");
+            } else {
+                await loadCategories();
+                renderCategoryItems();
+                loadContacts();
+            }
+        }
+
+        // --- ĐIỀU KHIỂN SEARCHABLE DROPDOWN LIÊN HỆ ---
         function toggleDropdown(fieldId) {
             event.stopPropagation();
             const dropdown = document.getElementById('dropdown' + fieldId);
@@ -299,11 +441,7 @@
             
             for (let i = 0; i < optionItems.length; i++) {
                 const txtValue = removeVietnameseTones(optionItems[i].textContent || optionItems[i].innerText);
-                if (txtValue.indexOf(filter) > -1) {
-                    optionItems[i].style.display = "";
-                } else {
-                    optionItems[i].style.display = "none";
-                }
+                optionItems[i].style.display = txtValue.indexOf(filter) > -1 ? "" : "none";
             }
         }
 
@@ -315,17 +453,15 @@
                 hiddenInput.value = "";
                 selectBox.querySelector('span').innerText = fieldId === 'formRegion' ? "-- Để trống / Toàn quốc --" : "-- Chọn danh mục --";
                 selectBox.classList.add('text-slate-400');
-                selectBox.classList.remove('text-slate-800');
             } else {
                 hiddenInput.value = id;
                 selectBox.querySelector('span').innerText = name;
                 selectBox.classList.remove('text-slate-400');
-                selectBox.classList.add('text-slate-800');
             }
             document.getElementById('dropdown' + fieldId).classList.add('hidden');
         }
 
-        // --- 4. TẢI DANH MỤC GỐC ---
+        // --- ĐỒNG BỘ DỮ LIỆU ---
         async function loadCategories() {
             const [posRes, titleRes, regRes] = await Promise.all([
                 _supabase.from('positions').select('id, name').order('name'),
@@ -356,27 +492,21 @@
 
             dataList.forEach(item => {
                 const div = document.createElement('div');
-                div.className = "option-item px-3 py-2 hover:bg-indigo-50 hover:text-indigo-600 cursor-pointer border-b border-slate-50 transition-all";
+                div.className = "option-item px-3 py-2 hover:bg-indigo-50 hover:text-indigo-600 cursor-pointer border-b border-slate-50 text-xs transition-all";
                 div.innerText = item.name;
                 div.onclick = () => selectOption(fieldId, item.id, item.name);
                 optionsContainer.appendChild(div);
             });
         }
 
-        // --- 5. ĐỒNG BỘ HIỂN THỊ ---
         async function loadContacts() {
             const { data, error } = await _supabase
                 .from('contacts')
-                .select(`
-                    id, name, phone, position_id, title_id, region_id,
-                    positions ( name ),
-                    titles ( name ),
-                    regions ( name )
-                `)
+                .select(`id, name, phone, position_id, title_id, region_id, positions(name), titles(name), regions(name)`)
                 .order('name', { ascending: true });
 
             if (error) {
-                document.getElementById('contactList').innerHTML = `<div class="text-center text-red-500 py-6">Lỗi kết nối: ${error.message}</div>`;
+                document.getElementById('contactList').innerHTML = `<div class="text-center text-red-500 py-6">Lỗi dữ liệu.</div>`;
                 return;
             }
             contactsData = data || [];
@@ -386,11 +516,10 @@
         function renderContacts(data) {
             const container = document.getElementById('contactList');
             container.innerHTML = '';
-            
             document.getElementById('counter').innerText = `Tổng số: ${data.length} liên hệ`;
 
             if(data.length === 0) {
-                container.innerHTML = `<div class="text-center py-12 text-slate-400 text-sm">Không tìm thấy kết quả phù hợp.</div>`;
+                container.innerHTML = `<div class="text-center py-12 text-slate-400 text-sm">Không tìm thấy kết quả.</div>`;
                 return;
             }
 
@@ -401,118 +530,62 @@
 
                 const row = document.createElement('div');
                 row.className = "bg-white p-3 md:px-6 md:py-2.5 rounded-xl md:rounded-none flex flex-col md:grid md:grid-cols-12 gap-1 md:gap-2 items-start md:items-center shadow-sm md:shadow-none border border-slate-100 md:border-b md:border-slate-100 hover:bg-slate-50/80 transition-all";
-                
                 row.innerHTML = `
-                    <div class="col-span-3 font-bold text-slate-800 text-sm sm:text-base md:text-sm flex items-center gap-2 min-w-0 w-full">
-                        <div class="w-7 h-7 bg-indigo-50 text-indigo-600 rounded-lg flex items-center justify-center text-xs shrink-0 font-black md:hidden">
-                            ${item.name.charAt(0).toUpperCase()}
-                        </div>
-                        <span class="truncate">${item.name}</span>
-                    </div>
-                    
-                    <div class="col-span-2 text-xs md:text-sm text-indigo-600 font-medium">
-                        <span class="md:hidden text-slate-400 font-normal">Chức danh: </span>${titleName}
-                    </div>
-
-                    <div class="col-span-2 text-xs md:text-sm text-slate-600 font-medium">
-                        <span class="md:hidden text-slate-400 font-normal">Chức vụ: </span>${posName}
-                    </div>
-                    
-                    <div class="col-span-2 text-xs md:text-sm text-slate-500 font-medium truncate w-full">
-                        <span class="md:hidden text-slate-400 font-normal">Địa bàn: </span>${regName}
-                    </div>
-                    
-                    <div class="col-span-2 text-sm font-bold text-slate-700 tracking-wide mt-1 md:mt-0">
-                        <span class="md:hidden text-slate-400 font-normal text-xs block">Số điện thoại: </span>
-                        <i class="fa-solid fa-phone text-slate-300 mr-1 text-xs md:inline hidden"></i>${item.phone}
-                    </div>
-                    
-                    <div class="col-span-1 flex items-center justify-end md:justify-center gap-2 w-full mt-2 md:mt-0 pt-2 md:pt-0 border-t border-slate-50 md:border-none shrink-0">
-                        ${currentAdminKey ? `
-                            <button onclick="openModal('edit', ${item.id})" class="text-xs font-semibold px-2 py-1 bg-amber-50 text-amber-700 border border-amber-200 rounded-lg hover:bg-amber-100 flex items-center gap-1" title="Sửa thông tin liên hệ">
-                                <i class="fa-solid fa-pen-to-square"></i>Sửa
-                            </button>
-                        ` : ''}
-                        <a href="tel:${item.phone}" class="w-7 h-7 md:w-8 md:h-8 bg-emerald-50 text-emerald-600 hover:bg-emerald-100 rounded-lg flex items-center justify-center shadow-sm active:scale-90 transition-all" title="Bấm gọi ngay">
-                            <i class="fa-solid fa-phone text-xs"></i>
-                        </a>
+                    <div class="col-span-3 font-bold text-slate-800 text-sm flex items-center gap-2 w-full"><span class="truncate">${item.name}</span></div>
+                    <div class="col-span-2 text-xs md:text-sm text-indigo-600 font-medium">${titleName}</div>
+                    <div class="col-span-2 text-xs md:text-sm text-slate-600 font-medium">${posName}</div>
+                    <div class="col-span-2 text-xs md:text-sm text-slate-500 truncate w-full">${regName}</div>
+                    <div class="col-span-2 text-sm font-bold text-slate-700 tracking-wide">${item.phone}</div>
+                    <div class="col-span-1 flex items-center justify-end md:justify-center gap-2 w-full mt-2 md:mt-0 pt-2 md:pt-0 border-t md:border-none">
+                        ${currentAdminKey ? `<button onclick="openModal('edit', ${item.id})" class="text-xs font-semibold px-2 py-1 bg-amber-50 text-amber-700 border border-amber-200 rounded-lg hover:bg-amber-100 flex items-center gap-1"><i class="fa-solid fa-pen-to-square"></i>Sửa</button>` : ''}
+                        <a href="tel:${item.phone}" class="w-7 h-7 bg-emerald-50 text-emerald-600 hover:bg-emerald-100 rounded-lg flex items-center justify-center shadow-sm"><i class="fa-solid fa-phone text-xs"></i></a>
                     </div>
                 `;
                 container.appendChild(row);
             });
         }
 
-        // --- 6. TÌM KIẾM ĐA TRƯỜNG DỮ LIỆU KHÔNG DẤU ---
         function filterContacts() {
             const query = removeVietnameseTones(document.getElementById('searchInput').value);
-            
             const filtered = contactsData.filter(c => {
-                const nameStr = removeVietnameseTones(c.name);
-                const phoneStr = c.phone;
-                const posStr = c.positions ? removeVietnameseTones(c.positions.name) : "";
-                const titleStr = c.titles ? removeVietnameseTones(c.titles.name) : "";
-                const regStr = c.regions ? removeVietnameseTones(c.regions.name) : "";
-                
-                return nameStr.includes(query) || 
-                       phoneStr.includes(query) || 
-                       posStr.includes(query) || 
-                       titleStr.includes(query) || 
-                       regStr.includes(query);
+                return removeVietnameseTones(c.name).includes(query) || 
+                       c.phone.includes(query) || 
+                       (c.positions && removeVietnameseTones(c.positions.name).includes(query)) ||
+                       (c.titles && removeVietnameseTones(c.titles.name).includes(query)) ||
+                       (c.regions && removeVietnameseTones(c.regions.name).includes(query));
             });
             renderContacts(filtered);
         }
 
-        // --- 7. ĐIỀU KHIỂN MODAL FORM ---
+        // --- ĐIỀU KHIỂN FORM LIÊN HỆ ---
         function openModal(mode, id = null) {
             document.getElementById('contactForm').reset();
             document.getElementById('contactModal').classList.remove('hidden');
-            document.querySelectorAll("[id^='dropdownform']").forEach(el => el.classList.add('hidden'));
-            
             if(mode === 'add') {
                 document.getElementById('modalTitle').innerText = "Thêm Thành Viên Mới";
                 document.getElementById('editId').value = "";
                 document.getElementById('deleteBtn').classList.add('hidden');
-                selectOption('formPosition', "", "");
-                selectOption('formTitle', "", "");
-                selectOption('formRegion', "", "");
+                selectOption('formPosition', "", ""); selectOption('formTitle', "", ""); selectOption('formRegion', "", "");
             } else {
                 document.getElementById('modalTitle').innerText = "Cập Nhật Thông Tin";
                 document.getElementById('editId').value = id;
                 document.getElementById('deleteBtn').classList.remove('hidden');
-                
                 const item = contactsData.find(c => c.id === id);
                 if(item) {
                     document.getElementById('formName').value = item.name;
                     document.getElementById('formPhone').value = item.phone;
-                    
-                    const currentPos = categories.positions.find(p => p.id === item.position_id);
-                    if(currentPos) selectOption('formPosition', currentPos.id, currentPos.name);
-
-                    const currentTitle = categories.titles.find(t => t.id === item.title_id);
-                    if(currentTitle) selectOption('formTitle', currentTitle.id, currentTitle.name);
-
-                    if(item.region_id) {
-                        const currentReg = categories.regions.find(r => r.id === item.region_id);
-                        if(currentReg) selectOption('formRegion', currentReg.id, currentReg.name);
-                    } else {
-                        selectOption('formRegion', "", "");
-                    }
+                    if(item.position_id) selectOption('formPosition', item.position_id, item.positions.name);
+                    if(item.title_id) selectOption('formTitle', item.title_id, item.titles.name);
+                    if(item.region_id) selectOption('formRegion', item.region_id, item.regions.name);
+                    else selectOption('formRegion', "", "");
                 }
             }
         }
-
         function closeModal() { document.getElementById('contactModal').classList.add('hidden'); }
 
-        // --- 8. GỬI DỮ LIỆU LÊN CLOUD ---
         async function handleFormSubmit(e) {
             e.preventDefault();
             const id = document.getElementById('editId').value;
-            
-            if(!document.getElementById('formPosition').value || !document.getElementById('formTitle').value) {
-                alert("Vui lòng gõ và chọn Chức vụ / Chức danh bằng danh mục!");
-                return;
-            }
-
             const payload = {
                 name: document.getElementById('formName').value.trim(),
                 phone: document.getElementById('formPhone').value.trim(),
@@ -521,40 +594,19 @@
                 region_id: document.getElementById('formRegion').value ? parseInt(document.getElementById('formRegion').value) : null
             };
 
-            const clientWithAuth = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
-                global: { headers: { 'x-admin-key': currentAdminKey } }
-            });
+            const client = getAuthClient();
+            let res = id === "" ? await client.from('contacts').insert([payload]) : await client.from('contacts').update(payload).eq('id', id);
 
-            let result;
-            if(id === "") {
-                result = await clientWithAuth.from('contacts').insert([payload]);
-            } else {
-                result = await clientWithAuth.from('contacts').update(payload).eq('id', id);
-            }
-
-            if(result.error) {
-                alert("Lỗi thao tác! Mật mã quản trị không đúng hoặc phiên làm việc hết hạn quyền.");
-                console.error(result.error);
-            } else {
-                closeModal();
-                loadContacts();
-            }
+            if(res.error) alert("Bạn không có quyền thực hiện thao tác này!");
+            else { closeModal(); loadContacts(); }
         }
 
-        // --- 9. HÀNH ĐỘNG XÓA ---
         async function deleteContact() {
             const id = document.getElementById('editId').value;
-            if(id && confirm("Bạn có thực sự chắc chắn muốn xóa vĩnh viễn liên hệ này không?")) {
-                const clientWithAuth = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
-                    global: { headers: { 'x-admin-key': currentAdminKey } }
-                });
-                const { error } = await clientWithAuth.from('contacts').delete().eq('id', id);
-                if(error) {
-                    alert("Không thể xóa! Có lỗi hệ thống hoặc token xác thực Admin sai.");
-                } else {
-                    closeModal();
-                    loadContacts();
-                }
+            if(id && confirm("Xóa vĩnh viễn liên hệ này?")) {
+                const { error } = await getAuthClient().from('contacts').delete().eq('id', id);
+                if(error) alert("Không thể xóa!");
+                else { closeModal(); loadContacts(); }
             }
         }
 
@@ -562,7 +614,6 @@
             updateAdminUI();
             await loadCategories();
             await loadContacts();
-            
             document.getElementById('adminPasswordInput').addEventListener('keypress', function(e) {
                 if (e.key === 'Enter') submitAdminLogin();
             });
